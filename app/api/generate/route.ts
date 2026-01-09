@@ -27,19 +27,41 @@ export async function POST(req: NextRequest) {
             // Or we generate an image first. Let's start with a high quality Image generation.
 
             console.log("Generating base image from text...");
-            const imagePrediction = await replicate.run(
-                "black-forest-labs/flux-schnell", // Fast & Good
-                {
-                    input: {
-                        prompt: `A cute 3d render of ${prompt}, white background, high quality, cartoony style, pixar style, 4k`,
-                        go_fast: true,
-                        num_outputs: 1
-                    }
-                }
-            );
+            console.log("Generating base image from text...");
 
-            const generatedImageUrl = (imagePrediction as string[])[0]; // Output is array of URLs
-            console.log("Image generated:", generatedImageUrl);
+            // Step 1: Generate Image using Flux Pro (reliable URL output)
+            // Using predictions.create + polling to ensure we get a clear URL string, not a stream
+            const imgPrediction = await replicate.predictions.create({
+                model: "black-forest-labs/flux-1.1-pro",
+                input: {
+                    prompt: `A cute 3d render of ${prompt}, white background, high quality, cartoony style, pixar style, 4k`,
+                    width: 1024,
+                    height: 1024,
+                    aspect_ratio: "1:1",
+                    output_format: "png", // Force PNG format 
+                    safety_tolerance: 2
+                }
+            });
+
+            // Poll for image completion
+            let generatedImageUrl = "";
+            let attempts = 0;
+            while (attempts < 60) {
+                const status = await replicate.predictions.get(imgPrediction.id);
+                if (status.status === 'succeeded' && status.output) {
+                    generatedImageUrl = status.output as string;
+                    break;
+                }
+                if (status.status === 'failed' || status.status === 'canceled') {
+                    throw new Error("Image generation failed");
+                }
+                await new Promise(r => setTimeout(r, 1000));
+                attempts++;
+            }
+
+            if (!generatedImageUrl) throw new Error("Image generation timed out");
+
+            console.log("Image generated successfully:", generatedImageUrl);
 
             // Now convert this image to 3D
             console.log("Converting to 3D using proven version...");
