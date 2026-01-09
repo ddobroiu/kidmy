@@ -33,6 +33,28 @@ model User {
   shopPurchases      ShopPurchase[]
 }
 
+model BillingDetails {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String   @default("personal") // personal, company
+  firstName   String?
+  lastName    String?
+  companyName String?
+  cui         String?  // VAT ID
+  regCom      String?  // J-number
+  address     String
+  city        String
+  state       String?
+  country     String
+  zip         String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
 model Account {
   id                 String  @id @default(cuid())
   userId             String
