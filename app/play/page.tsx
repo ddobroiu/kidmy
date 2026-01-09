@@ -1,86 +1,36 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { XR, ARButton, Interactive, createXRStore } from "@react-three/xr";
-import { Environment, useGLTF, Text, Html } from "@react-three/drei";
-import { Matrix4, Vector3, Quaternion, Euler } from "three";
-import { Mic, Volume2, Gamepad2, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { Mic, AlertTriangle } from "lucide-react";
 
-// Create XR Store
-const store = createXRStore();
-
-// Componenta pentru Modelul Plasat
-function PlacedModel({ url, position, isSpeaking, onSpeak }: { url: string, position: Vector3, isSpeaking: boolean, onSpeak: () => void }) {
-    const model = useGLTF(url);
-    const meshRef = useRef<any>(null);
-
-    // Animație simplă "Idle" (plutire ușoară)
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.005;
-            // Salt mic când vorbește
-            if (isSpeaking) {
-                meshRef.current.position.y = position.y + Math.sin(state.clock.elapsedTime * 10) * 0.05;
-            } else {
-                meshRef.current.position.y = position.y;
-            }
-        }
-    });
-
-    return (
-        <Interactive onSelect={onSpeak}>
-            <primitive
-                ref={meshRef}
-                object={model.scene}
-                position={position}
-                scale={[0.5, 0.5, 0.5]} // Scala modelului - ajustabil
-            />
-            {isSpeaking && (
-                <Html position={[position.x, position.y + 1, position.z]} center>
-                    <div className="bg-white px-3 py-1 rounded-full shadow-lg border border-primary animate-pulse">
-                        <Volume2 className="w-5 h-5 text-primary" />
-                    </div>
-                </Html>
-            )}
-        </Interactive>
-    );
-}
-
-// Scena Principală AR
-function ARScene({ modelUrl, isSpeaking, onCharacterTouch }: { modelUrl: string, isSpeaking: boolean, onCharacterTouch: () => void }) {
-    // Plasare fixă în fața camerei pentru moment (0, -0.5, -2)
-    const modelPos = new Vector3(0, -0.5, -3);
-
-    return (
-        <>
-            <ambientLight intensity={1} />
-            <directionalLight position={[10, 10, 5]} intensity={2} />
-
-            <PlacedModel
-                url={modelUrl}
-                position={modelPos}
-                isSpeaking={isSpeaking}
-                onSpeak={onCharacterTouch}
-            />
-        </>
-    );
-}
+// Importăm dinamic componenta AR pentru a evita SSR (Server Side Rendering)
+const ARView = dynamic(() => import("@/components/ARView"), {
+    ssr: false,
+    loading: () => <p className="text-white text-center mt-20">Se încarcă modulul AR...</p>
+});
 
 export default function PlayARPage() {
-    const [isArSupported, setIsArSupported] = useState(true); // Presupunem true, testăm la mount
-    const [placed, setPlaced] = useState(false);
+    const [isArSupported, setIsArSupported] = useState(true);
     const [transcript, setTranscript] = useState("Apasă pe ecran pentru a plasa personajul!");
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [isClient, setIsClient] = useState(false);
 
-    // Model de test (înlocuiește cu cel generat)
-    // const modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
-
-    // Vom folosi un URL public temporar pentru că useGLTF cere URL accesibil
+    // Model de test
     const modelUrl = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb";
 
-    // Funcție simplă de Speak (Browser API)
+    useEffect(() => {
+        setIsClient(true);
+        if (navigator.xr) {
+            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                setIsArSupported(supported);
+            });
+        } else {
+            setIsArSupported(false);
+        }
+    }, []);
+
     const speak = (text: string) => {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
@@ -99,7 +49,6 @@ export default function PlayARPage() {
         }
 
         setIsListening(true);
-        // Mock recognition
         setTimeout(() => {
             setIsListening(false);
             const responses = [
@@ -119,15 +68,7 @@ export default function PlayARPage() {
         setTranscript("Gâdilă! Hahaha!");
     };
 
-    useEffect(() => {
-        if (navigator.xr) {
-            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                setIsArSupported(supported);
-            });
-        } else {
-            setIsArSupported(false);
-        }
-    }, []);
+    if (!isClient) return null; // Avoid hydration mismatch
 
     if (!isArSupported) {
         return (
@@ -150,15 +91,8 @@ export default function PlayARPage() {
 
     return (
         <div className="h-screen w-full bg-black relative overflow-hidden">
-            {/* Butonul de Start AR (necesar pentru permisiuni) */}
-            <div className="absolute inset-x-0 bottom-10 z-50 flex justify-center pointer-events-none">
-                <ARButton
-                    store={store}
-                    className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:bg-white/20 transition-all flex items-center gap-3"
-                />
-            </div>
 
-            {/* Mesaje HUD (Heads-Up Display) */}
+            {/* Mesaje HUD */}
             <div className="absolute top-8 left-0 right-0 z-40 px-6 text-center pointer-events-none">
                 <div className="bg-black/60 backdrop-blur-md text-white px-6 py-3 rounded-2xl inline-block max-w-sm shadow-xl border border-white/10">
                     <p className="text-lg font-medium">{transcript}</p>
@@ -175,16 +109,12 @@ export default function PlayARPage() {
                 </button>
             </div>
 
-            {/* Canvas 3D */}
-            <Canvas>
-                <XR store={store}>
-                    <ARScene
-                        modelUrl={modelUrl}
-                        isSpeaking={isSpeaking}
-                        onCharacterTouch={handleCharacterTouch}
-                    />
-                </XR>
-            </Canvas>
+            {/* AR View Component (Client Only) */}
+            <ARView
+                modelUrl={modelUrl}
+                isSpeaking={isSpeaking}
+                onCharacterTouch={handleCharacterTouch}
+            />
         </div>
     );
 }
