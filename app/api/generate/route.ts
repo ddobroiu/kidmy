@@ -42,25 +42,29 @@ export async function POST(req: NextRequest) {
             console.log("Image generated:", generatedImageUrl);
 
             // Now convert this image to 3D
-            console.log("Converting to 3D...");
-            // Use replicate.run with model name instead of specific version hash to avoid 422 errors if hash changes
+            console.log("Converting to 3D using proven version...");
+            // Use proven version from 3dview project
             prediction = await replicate.predictions.create({
-                model: "jeffreyxi/trellis",
+                version: "e8f6c45206993f297372f5436b90350817bd9b4a0d52d2a76df50c1c8afa2b3c",
                 input: {
-                    image: generatedImageUrl,
-                    texture_size: 1024,
-                    mesh_simplify: 0.95 // Optimize for mobile AR
+                    images: [generatedImageUrl],
+                    generate_model: true,
+                    generate_color: true,
+                    save_gaussian_ply: true,
+                    randomize_seed: true
                 }
             });
 
         } else if (imageUrl) {
             // Image to 3D directly
             prediction = await replicate.predictions.create({
-                model: "jeffreyxi/trellis",
+                version: "e8f6c45206993f297372f5436b90350817bd9b4a0d52d2a76df50c1c8afa2b3c",
                 input: {
-                    image: imageUrl,
-                    texture_size: 1024,
-                    mesh_simplify: 0.95
+                    images: [imageUrl],
+                    generate_model: true,
+                    generate_color: true,
+                    save_gaussian_ply: true,
+                    randomize_seed: true
                 }
             });
         }
