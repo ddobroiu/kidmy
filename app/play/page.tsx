@@ -2,10 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { XR, ARButton, Interactive } from "@react-three/xr";
+import { XR, ARButton, Interactive, createXRStore } from "@react-three/xr";
 import { Environment, useGLTF, Text, Html } from "@react-three/drei";
 import { Matrix4, Vector3, Quaternion, Euler } from "three";
 import { Mic, Volume2, Gamepad2, AlertTriangle } from "lucide-react";
+
+// Create XR Store
+const store = createXRStore();
 
 // Componenta pentru Modelul Plasat
 function PlacedModel({ url, position, isSpeaking, onSpeak }: { url: string, position: Vector3, isSpeaking: boolean, onSpeak: () => void }) {
@@ -150,6 +153,7 @@ export default function PlayARPage() {
             {/* Butonul de Start AR (necesar pentru permisiuni) */}
             <div className="absolute inset-x-0 bottom-10 z-50 flex justify-center pointer-events-none">
                 <ARButton
+                    store={store}
                     className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:bg-white/20 transition-all flex items-center gap-3"
                 />
             </div>
@@ -173,7 +177,7 @@ export default function PlayARPage() {
 
             {/* Canvas 3D */}
             <Canvas>
-                <XR>
+                <XR store={store}>
                     <ARScene
                         modelUrl={modelUrl}
                         isSpeaking={isSpeaking}
