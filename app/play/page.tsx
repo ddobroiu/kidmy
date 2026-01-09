@@ -151,7 +151,6 @@ export default function PlayARPage() {
             <div className="absolute inset-x-0 bottom-10 z-50 flex justify-center pointer-events-none">
                 <ARButton
                     className="pointer-events-auto bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:bg-white/20 transition-all flex items-center gap-3"
-                    sessionInit={{ requiredFeatures: ['hit-test'] }}
                 />
             </div>
 
