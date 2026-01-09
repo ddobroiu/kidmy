@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { XR, ARButton, Interactive, createXRStore } from "@react-three/xr";
 import { useGLTF, Html } from "@react-three/drei";
@@ -53,12 +53,14 @@ function ARScene({ modelUrl, isSpeaking, onCharacterTouch }: { modelUrl: string,
         <>
             <ambientLight intensity={1} />
             <directionalLight position={[10, 10, 5]} intensity={2} />
-            <PlacedModel
-                url={modelUrl}
-                position={modelPos}
-                isSpeaking={isSpeaking}
-                onSpeak={onCharacterTouch}
-            />
+            <Suspense fallback={null}>
+                <PlacedModel
+                    url={modelUrl}
+                    position={modelPos}
+                    isSpeaking={isSpeaking}
+                    onSpeak={onCharacterTouch}
+                />
+            </Suspense>
         </>
     );
 }

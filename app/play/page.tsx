@@ -11,7 +11,7 @@ const ARView = dynamic(() => import("@/components/ARView"), {
 });
 
 export default function PlayARPage() {
-    const [isArSupported, setIsArSupported] = useState(true);
+    const [arStatus, setArStatus] = useState<"checking" | "supported" | "unsupported">("checking");
     const [transcript, setTranscript] = useState("Apasă pe ecran pentru a plasa personajul!");
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -23,11 +23,17 @@ export default function PlayARPage() {
     useEffect(() => {
         setIsClient(true);
         if (navigator.xr) {
-            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                setIsArSupported(supported);
-            });
+            navigator.xr.isSessionSupported('immersive-ar')
+                .then((supported) => {
+                    setArStatus(supported ? "supported" : "unsupported");
+                })
+                .catch((err) => {
+                    console.error("WebXR check error:", err);
+                    setArStatus("unsupported");
+                });
         } else {
-            setIsArSupported(false);
+            console.log("WebXR not found");
+            setArStatus("unsupported");
         }
     }, []);
 
@@ -70,7 +76,16 @@ export default function PlayARPage() {
 
     if (!isClient) return null; // Avoid hydration mismatch
 
-    if (!isArSupported) {
+    if (arStatus === "checking") {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-black text-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                <p>Se verifică compatibilitatea AR...</p>
+            </div>
+        );
+    }
+
+    if (arStatus === "unsupported") {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-black">
                 <div className="bg-yellow-100 p-6 rounded-full mb-6">
