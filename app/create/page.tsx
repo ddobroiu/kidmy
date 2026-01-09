@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
-const ChatInterface = dynamic(() => import("@/components/ChatInterface"), { ssr: false });
+
 
 export default function CreatePage() {
     const [mode, setMode] = useState<"text" | "image">("text");
@@ -173,7 +173,6 @@ export default function CreatePage() {
                         {resultModel ? (
                             <>
                                 <ModelViewer url={resultModel} />
-                                <ChatInterface characterName="Personajul Tău" characterDescription={prompt || "un prieten nou"} />
                                 <button
                                     onClick={() => setResultModel(null)}
                                     className="absolute top-4 left-4 bg-white/20 backdrop-blur text-white p-2 rounded-lg hover:bg-white/30 transition-colors"
