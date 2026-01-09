@@ -43,8 +43,9 @@ export async function POST(req: NextRequest) {
 
             // Now convert this image to 3D
             console.log("Converting to 3D...");
+            // Use replicate.run with model name instead of specific version hash to avoid 422 errors if hash changes
             prediction = await replicate.predictions.create({
-                version: "59dd024346fa44b4131af668277259f9351475c742c38848a624f220377227c2", // Trellis (State of the art, fast)
+                model: "jeffreyxi/trellis",
                 input: {
                     image: generatedImageUrl,
                     texture_size: 1024,
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
         } else if (imageUrl) {
             // Image to 3D directly
             prediction = await replicate.predictions.create({
-                version: "59dd024346fa44b4131af668277259f9351475c742c38848a624f220377227c2", // Trellis
+                model: "jeffreyxi/trellis",
                 input: {
                     image: imageUrl,
                     texture_size: 1024,
