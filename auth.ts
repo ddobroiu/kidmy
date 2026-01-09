@@ -25,7 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const { host } = new URL(url);
                     // Standard Resend logic
                     await resend.emails.send({
-                        from: provider.from,
+                        from: provider.from || "onboarding@resend.dev",
                         to: identifier,
                         subject: `Autentificare în Kidmy`,
                         text: `Link magic pentru logare: ${url}`,
