@@ -1,52 +1,37 @@
 "use client";
 
-import { useState, useRef, Suspense } from "react";
+import { useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { XR, ARButton, Interactive, createXRStore } from "@react-three/xr";
-import { useGLTF, Html } from "@react-three/drei";
+import { XR, ARButton, createXRStore } from "@react-three/xr";
+import { useGLTF } from "@react-three/drei";
 import { Vector3 } from "three";
-import { Volume2 } from "lucide-react";
 
 // Create XR Store INSIDE the client-only module scope (it's fine here if the file is loaded only on client)
 const store = createXRStore();
 
 // Componenta pentru Modelul Plasat
-function PlacedModel({ url, position, isSpeaking, onSpeak }: { url: string, position: Vector3, isSpeaking: boolean, onSpeak: () => void }) {
+function PlacedModel({ url, position }: { url: string, position: Vector3 }) {
     const model = useGLTF(url);
     const meshRef = useRef<any>(null);
 
-    useFrame((state) => {
+    useFrame(() => {
         if (meshRef.current) {
             meshRef.current.rotation.y += 0.005;
-            if (isSpeaking) {
-                meshRef.current.position.y = position.y + Math.sin(state.clock.elapsedTime * 10) * 0.05;
-            } else {
-                meshRef.current.position.y = position.y;
-            }
         }
     });
 
     return (
-        <Interactive onSelect={onSpeak}>
-            <primitive
-                ref={meshRef}
-                object={model.scene}
-                position={position}
-                scale={[0.5, 0.5, 0.5]}
-            />
-            {isSpeaking && (
-                <Html position={[position.x, position.y + 1, position.z]} center>
-                    <div className="bg-white px-3 py-1 rounded-full shadow-lg border border-primary animate-pulse">
-                        <Volume2 className="w-5 h-5 text-primary" />
-                    </div>
-                </Html>
-            )}
-        </Interactive>
+        <primitive
+            ref={meshRef}
+            object={model.scene}
+            position={position}
+            scale={[0.5, 0.5, 0.5]}
+        />
     );
 }
 
 // Scena Principală AR
-function ARScene({ modelUrl, isSpeaking, onCharacterTouch }: { modelUrl: string, isSpeaking: boolean, onCharacterTouch: () => void }) {
+function ARScene({ modelUrl }: { modelUrl: string }) {
     const modelPos = new Vector3(0, -0.5, -3);
 
     return (
@@ -57,8 +42,6 @@ function ARScene({ modelUrl, isSpeaking, onCharacterTouch }: { modelUrl: string,
                 <PlacedModel
                     url={modelUrl}
                     position={modelPos}
-                    isSpeaking={isSpeaking}
-                    onSpeak={onCharacterTouch}
                 />
             </Suspense>
         </>
@@ -67,12 +50,8 @@ function ARScene({ modelUrl, isSpeaking, onCharacterTouch }: { modelUrl: string,
 
 export default function ARView({
     modelUrl,
-    isSpeaking,
-    onCharacterTouch
 }: {
     modelUrl: string,
-    isSpeaking: boolean,
-    onCharacterTouch: () => void
 }) {
     return (
         <>
@@ -86,8 +65,6 @@ export default function ARView({
                 <XR store={store}>
                     <ARScene
                         modelUrl={modelUrl}
-                        isSpeaking={isSpeaking}
-                        onCharacterTouch={onCharacterTouch}
                     />
                 </XR>
             </Canvas>
