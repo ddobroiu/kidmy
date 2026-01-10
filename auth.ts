@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import EmailProvider from "next-auth/providers/email";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_missing_key");
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
