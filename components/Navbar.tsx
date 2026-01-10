@@ -31,9 +31,6 @@ export default function Navbar() {
                             <Link href="/create" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
                                 Creează
                             </Link>
-                            <Link href="/play" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
-                                Joacă-te
-                            </Link>
                             <Link href="/gallery" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
                                 Galerie
                             </Link>
@@ -75,9 +72,6 @@ export default function Navbar() {
                         </Link>
                         <Link href="/create" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Creează
-                        </Link>
-                        <Link href="/play" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
-                            Joacă-te
                         </Link>
                         <Link href="/gallery" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Galerie
