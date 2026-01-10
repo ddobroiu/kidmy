@@ -9,16 +9,34 @@ export default function ParentsDashboard() {
     const [purchasing, setPurchasing] = useState<string | null>(null);
 
     const handlePurchase = async (packageId: string) => {
-        // Here we will implement the Stripe Checkout redirect logic
-        // Need to ensure user is logged in first
         setPurchasing(packageId);
 
         try {
-            // Simulated delay for now
-            await new Promise(r => setTimeout(r, 1000));
-            alert(`Inițiem plata pentru pachetul ${packageId}... (Backend de plăți în lucru)`);
+            const response = await fetch("/api/stripe/create-checkout-session", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ packageId }),
+            });
+
+            if (response.status === 401) {
+                window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.href)}`;
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "A apărut o eroare la inițierea plății.");
+            }
+
+            // Redirect to Stripe Checkout
+            window.location.href = data.url;
+
         } catch (err) {
             console.error(err);
+            alert(err instanceof Error ? err.message : "Eroare la procesarea cererii.");
         } finally {
             setPurchasing(null);
         }
@@ -88,8 +106,8 @@ function PricingCard({ pkg, index, purchasing, onPurchase }: { pkg: any, index: 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={`relative p-8 rounded-3xl flex flex-col transition-all duration-300 ${pkg.popular
-                    ? 'bg-white dark:bg-gray-800 border-2 border-primary shadow-2xl scale-105 z-10'
-                    : 'bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl hover:translate-y-[-5px]'
+                ? 'bg-white dark:bg-gray-800 border-2 border-primary shadow-2xl scale-105 z-10'
+                : 'bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl hover:translate-y-[-5px]'
                 }`}
         >
             {pkg.popular && (
@@ -130,8 +148,8 @@ function PricingCard({ pkg, index, purchasing, onPurchase }: { pkg: any, index: 
                 onClick={onPurchase}
                 disabled={purchasing}
                 className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${pkg.popular
-                        ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
                 {purchasing ? (

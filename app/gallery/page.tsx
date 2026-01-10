@@ -60,7 +60,7 @@ export default function GalleryPage() {
                             )}
                         >
                             <User className="w-5 h-5" />
-                            Creațiile Comunității
+                            Jucăriile Mele
                         </button>
                         <button
                             onClick={() => setActiveTab("shop")}
@@ -87,12 +87,26 @@ export default function GalleryPage() {
                         {displayedItems.length === 0 ? (
                             <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
                                 <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-gray-400">Încă nu sunt modele aici.</h3>
+                                <h3 className="text-xl font-bold text-gray-400">
+                                    {activeTab === "creations" ? "Nu ai nicio jucărie încă." : "Încă nu sunt modele aici."}
+                                </h3>
+
                                 {activeTab === "creations" && (
-                                    <Link href="/create" className="mt-6 inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-colors">
-                                        <Rocket className="w-5 h-5" />
-                                        Fii primul creator!
-                                    </Link>
+                                    <div className="mt-6 flex flex-col items-center gap-3">
+                                        <p className="text-gray-500 max-w-md mx-auto mb-2">
+                                            Dacă te-ai logat, creează prima ta jucărie! Dacă nu, autentifică-te pentru a vedea colecția ta.
+                                        </p>
+                                        <div className="flex gap-4">
+                                            <Link href="/create" className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-colors">
+                                                <Rocket className="w-5 h-5" />
+                                                Creează Acum
+                                            </Link>
+                                            <Link href="/login" className="inline-flex items-center gap-2 bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                                                <User className="w-5 h-5" />
+                                                Logare
+                                            </Link>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         ) : (
@@ -162,7 +176,7 @@ function GalleryCard({ item, type }: { item: any, type: "shop" | "creations" }) 
                         </div>
                     ) : (
                         <div className="text-sm text-gray-500">
-                            de <span className="font-bold text-gray-700 dark:text-gray-300">Creator Anonim</span>
+                            <span className="font-bold text-gray-700 dark:text-gray-300">Creat de Tine ✨</span>
                         </div>
                     )}
 
