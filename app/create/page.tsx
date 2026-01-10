@@ -38,11 +38,11 @@ export default function CreatePage() {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || "A apărut o eroare la pornire.");
             }
-            const { id } = await res.json();
+            const { id, generationId } = await res.json();
 
             // 2. Poll for status
             const interval = setInterval(async () => {
-                const statusRes = await fetch(`/api/status?id=${id}`);
+                const statusRes = await fetch(`/api/status?id=${id}&generationId=${generationId}`);
                 const data = await statusRes.json();
 
                 if (data.status === "succeeded") {

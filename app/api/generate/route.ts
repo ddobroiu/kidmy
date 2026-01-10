@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { replicate } from "@/lib/replicate";
-import { r2, UPLOAD_BUCKET } from "@/lib/r2";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 // Force dynamic since we use Request
@@ -8,6 +8,16 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {
+        const session = await auth();
+        // Allow generation without login? User wants gallery, so login preferred.
+        // For now, if not logged in, we might not save to DB or save with null user?
+        // Schema says User relation is required: `userId String`.
+        // So we strictly require login for saving to gallery.
+
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Te rugăm să te autentifici pentru a salva creațiile!" }, { status: 401 });
+        }
+
         const { prompt, imageUrl, mode } = await req.json();
 
         // 1. Basic Validation
@@ -18,19 +28,14 @@ export async function POST(req: NextRequest) {
         console.log(`Starting generation. Mode: ${mode}, Prompt: ${prompt}`);
 
         let prediction;
+        let finalPrompt = prompt;
+        let sourceImage = imageUrl;
 
-        // 2. Text to 3D Generation (using Trellis or similar fast model)
+        // 2. Text to 3D Generation
         if (mode === 'text' && prompt) {
-            // Step A: Text-to-Image first (Flux)
-            // Step B: Image-to-3D (Trellis)
-            // For speed/demo, we use a direct Text-to-3D or standard workflow if available
-            // Or we generate an image first. Let's start with a high quality Image generation.
-
-            console.log("Generating base image from text...");
             console.log("Generating base image from text...");
 
-            // Step 1: Generate Image using Flux Pro (reliable URL output)
-            // Using predictions.create + polling to ensure we get a clear URL string, not a stream
+            // Step 1: Generate Image (Flux)
             const imgPrediction = await replicate.predictions.create({
                 model: "black-forest-labs/flux-1.1-pro",
                 input: {
@@ -38,12 +43,12 @@ export async function POST(req: NextRequest) {
                     width: 1024,
                     height: 1024,
                     aspect_ratio: "1:1",
-                    output_format: "png", // Force PNG format 
+                    output_format: "png",
                     safety_tolerance: 2
                 }
             });
 
-            // Poll for image completion
+            // Poll for image
             let generatedImageUrl = "";
             let attempts = 0;
             while (attempts < 60) {
@@ -61,11 +66,11 @@ export async function POST(req: NextRequest) {
 
             if (!generatedImageUrl) throw new Error("Image generation timed out");
 
-            console.log("Image generated successfully:", generatedImageUrl);
+            sourceImage = generatedImageUrl;
+            console.log("Image generated:", generatedImageUrl);
 
-            // Now convert this image to 3D
-            console.log("Converting to 3D using proven version...");
-            // Use proven version from 3dview project
+            // Step 2: Image to 3D
+            console.log("Converting to 3D...");
             prediction = await replicate.predictions.create({
                 version: "e8f6c45206993f297372f5436b90350817bd9b4a0d52d2a76df50c1c8afa2b3c",
                 input: {
@@ -91,11 +96,25 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // 3. Save initial record to DB (Optional, skipping for speed in MVP)
+        // 3. Save initial record to DB
+        let generation;
+        if (prediction) {
+            generation = await prisma.generation.create({
+                data: {
+                    userId: session.user.id,
+                    prompt: finalPrompt,
+                    originalImageUrl: sourceImage,
+                    status: "PROCESSING",
+                    // We can store prediction ID temporarily in hostUrl or just rely on client passing it
+                    // But for robustness, let's keep it clean. Client passes IDs.
+                }
+            });
+        }
 
         return NextResponse.json({
             id: prediction?.id,
-            status: prediction?.status
+            status: prediction?.status,
+            generationId: generation?.id
         });
 
     } catch (error: any) {
