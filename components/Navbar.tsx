@@ -37,6 +37,12 @@ export default function Navbar() {
                             <Link href="/gallery" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
                                 Galerie
                             </Link>
+                            <Link href="/parents" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                                Părinți
+                            </Link>
+                            <Link href="/login" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                                Logare
+                            </Link>
                         </div>
                     </div>
 
@@ -72,6 +78,15 @@ export default function Navbar() {
                         </Link>
                         <Link href="/play" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Joacă-te
+                        </Link>
+                        <Link href="/gallery" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
+                            Galerie
+                        </Link>
+                        <Link href="/parents" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
+                            Părinți
+                        </Link>
+                        <Link href="/login" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
+                            Logare
                         </Link>
                         <Link href="/create" className="mt-4 bg-primary text-white block px-3 py-4 rounded-xl text-base font-bold text-xl mx-4">
                             Începe Aventura!
