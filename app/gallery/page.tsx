@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ShoppingCart, User, Download, Share2, Loader2, Rocket } from "lucide-react";
+import { Sparkles, ShoppingCart, User, Download, Share2, Loader2, Rocket, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,10 @@ export default function GalleryPage() {
         };
         fetchGallery();
     }, []);
+
+    const handleRemoveItem = (id: string) => {
+        setGenerations(prev => prev.filter(g => g.id !== id));
+    };
 
     const displayedItems = activeTab === "shop" ? items : generations;
 
@@ -117,6 +121,7 @@ export default function GalleryPage() {
                                             key={item.id}
                                             item={item}
                                             type={activeTab}
+                                            onRemove={handleRemoveItem}
                                         />
                                     ))}
                                 </AnimatePresence>
@@ -130,12 +135,27 @@ export default function GalleryPage() {
     );
 }
 
-function GalleryCard({ item, type }: { item: any, type: "shop" | "creations" }) {
+function GalleryCard({ item, type, onRemove }: { item: any, type: "shop" | "creations", onRemove?: (id: string) => void }) {
     const title = type === "shop" ? item.title : (item.prompt || "Personaj Misterios");
-    const modelUrl = item.modelUrl || (item.output && item.output.model_file); // Adapting based on API response structure if needed
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    // Fallback if URL is missing
-    if (!item.modelUrl && !modelUrl) return null;
+    const handleDelete = async () => {
+        if (!confirm("Ești sigur că vrei să ștergi această jucărie?")) return;
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/gallery/item?id=${item.id}`, { method: "DELETE" });
+            if (res.ok) {
+                if (onRemove) onRemove(item.id);
+            } else {
+                alert("Eroare la ștergere.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Eroare la ștergere.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <motion.div
@@ -181,6 +201,16 @@ function GalleryCard({ item, type }: { item: any, type: "shop" | "creations" }) 
                     )}
 
                     <div className="flex gap-2">
+                        {type === "creations" && (
+                            <button
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="p-2 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                                title="Șterge"
+                            >
+                                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <X className="w-5 h-5" />}
+                            </button>
+                        )}
                         <button
                             className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white transition-colors"
                             title="Descarcă"
