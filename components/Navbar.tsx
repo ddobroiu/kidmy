@@ -5,8 +5,11 @@ import { useState } from "react";
 import { Menu, X, Rocket, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useSession, signOut } from "next-auth/react";
+
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { data: session } = useSession();
 
     return (
         <nav className="fixed w-full z-50 top-0 left-0 border-b border-white/10 bg-white/70 dark:bg-black/70 backdrop-blur-md">
@@ -22,33 +25,48 @@ export default function Navbar() {
                         </span>
                     </Link>
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
-                            <Link href="/" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                    {/* Desktop Menu - Centered */}
+                    <div className="hidden md:flex flex-1 justify-center items-center">
+                        <div className="flex items-baseline space-x-6">
+                            <Link href="/" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
                                 Acasă
                             </Link>
-                            <Link href="/create" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
-                                Creează
-                            </Link>
-                            <Link href="/gallery" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                            <Link href="/gallery" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
                                 Galerie
                             </Link>
-                            <Link href="/parents" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                            <Link href="/parents" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
                                 Părinți
-                            </Link>
-                            <Link href="/login" className="hover:text-primary px-3 py-2 rounded-md text-sm font-bold transition-colors">
-                                Logare
                             </Link>
                         </div>
                     </div>
 
-                    {/* Action Button */}
-                    <div className="hidden md:block">
-                        <Link href="/create" className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-primary/30 transition-all hover:scale-105 flex items-center gap-2">
-                            <Gamepad2 className="w-5 h-5" />
-                            Start
-                        </Link>
+                    {/* Action Buttons - Right Side */}
+                    <div className="hidden md:flex items-center gap-3">
+                        {!session ? (
+                            <Link
+                                href="/login"
+                                className="text-gray-900 dark:text-white hover:text-primary font-bold px-4 py-2 transition-colors border border-gray-200 dark:border-white/10 rounded-full hover:border-primary"
+                            >
+                                Logare
+                            </Link>
+                        ) : (
+                            <button
+                                onClick={() => signOut()}
+                                className="text-gray-900 dark:text-white hover:text-red-500 font-bold px-4 py-2 transition-colors"
+                            >
+                                Ieșire
+                            </button>
+                        )}
+
+                        {session && (
+                            <Link
+                                href="/create"
+                                className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-primary/30 transition-all hover:scale-105 flex items-center gap-2"
+                            >
+                                <Gamepad2 className="w-5 h-5" />
+                                Creează
+                            </Link>
+                        )}
                     </div>
 
                     {/* Mobile menu button */}
@@ -70,21 +88,28 @@ export default function Navbar() {
                         <Link href="/" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Acasă
                         </Link>
-                        <Link href="/create" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
-                            Creează
-                        </Link>
                         <Link href="/gallery" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Galerie
                         </Link>
                         <Link href="/parents" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Părinți
                         </Link>
-                        <Link href="/login" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
-                            Logare
-                        </Link>
-                        <Link href="/create" className="mt-4 bg-primary text-white block px-3 py-4 rounded-xl text-base font-bold text-xl mx-4">
-                            Începe Aventura!
-                        </Link>
+
+                        {!session ? (
+                            <Link href="/login" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
+                                Logare
+                            </Link>
+                        ) : (
+                            <button onClick={() => signOut()} className="w-full text-red-500 hover:text-red-600 block px-3 py-4 rounded-md text-base font-bold text-xl">
+                                Ieșire
+                            </button>
+                        )}
+
+                        {session && (
+                            <Link href="/create" className="mt-4 bg-primary text-white block px-3 py-4 rounded-xl text-base font-bold text-xl mx-4">
+                                Creează Acum
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}
