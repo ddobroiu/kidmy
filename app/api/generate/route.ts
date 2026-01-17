@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { replicate } from "@/lib/replicate";
+import { replicate, translateText } from "@/lib/replicate";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
@@ -68,13 +68,18 @@ export async function POST(req: NextRequest) {
         try {
             // 4. Text to 3D Generation
             if (mode === 'text' && prompt) {
-                console.log("Generating base image from text...");
+                // TRANSLATE PROMPT
+                if (/[^a-zA-Z0-9\s.,?!]/.test(prompt) || prompt.length > 5) {
+                    finalPrompt = await translateText(prompt);
+                }
+
+                console.log(`Generating base image from text: "${finalPrompt}"`);
 
                 // Step 1: Generate Image (Flux)
                 const imgPrediction = await replicate.predictions.create({
                     model: "black-forest-labs/flux-1.1-pro",
                     input: {
-                        prompt: `A cute 3d render of ${prompt}, white background, high quality, cartoony style, pixar style, 4k`,
+                        prompt: `A cute 3d render of ${finalPrompt}, white background, high quality, cartoony style, pixar style, 4k`,
                         width: 1024,
                         height: 1024,
                         aspect_ratio: "1:1",

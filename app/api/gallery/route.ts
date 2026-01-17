@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { translateText } from "@/lib/replicate";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,10 +13,15 @@ async function fetchSketchfab(query: string | null) {
     if (!apiKey) return [];
 
     try {
+        let searchQuery = query;
+        if (query && (/[^a-zA-Z0-9\s.,?!]/.test(query) || query.length > 4)) {
+            searchQuery = await translateText(query);
+        }
+
         let url = `https://api.sketchfab.com/v3/search?type=models&downloadable=true&sort_by=-likeCount&count=24`;
 
-        if (query) {
-            url += `&q=${encodeURIComponent(query)}`;
+        if (searchQuery) {
+            url += `&q=${encodeURIComponent(searchQuery)}`;
         } else {
             url += `&staffpicked=true`;
         }
