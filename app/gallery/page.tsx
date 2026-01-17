@@ -211,7 +211,18 @@ function GalleryCard({ item, type, onRemove }: { item: any, type: "shop" | "crea
                 </div>
 
                 <div className="w-full h-full pointer-events-none group-hover:pointer-events-auto">
-                    <ModelViewer url={item.modelUrl} showControls={false} />
+                    {item.isSketchfab || !item.modelUrl.startsWith('http') ? (
+                        <div className="w-full h-full relative">
+                            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-white font-bold bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                                    Previzualizare
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <ModelViewer url={item.modelUrl} showControls={false} />
+                    )}
                 </div>
             </div>
 
