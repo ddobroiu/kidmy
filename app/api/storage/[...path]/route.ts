@@ -2,9 +2,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { r2, UPLOAD_BUCKET } from "@/lib/r2";
 
-export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
     try {
-        const path = (await params).path.join("/");
+        const { path: pathArray } = await params;
+        const path = pathArray.join("/");
         const fileKey = path;
 
         if (!fileKey) {
