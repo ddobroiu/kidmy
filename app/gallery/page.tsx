@@ -233,8 +233,56 @@ function GalleryCard({ item, type, onRemove }: { item: any, type: "shop" | "crea
 
                 <div className="flex items-center justify-between mt-4">
                     {type === "shop" ? (
-                        <div className="text-xl font-black text-primary">
-                            {item.price === 0 ? "GRATUIT" : `${item.price} Credite`}
+                        <div className="flex items-center gap-2">
+                            {item.isSketchfab ? (
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        if (!confirm(`Vrei să cumperi "${title}" cu ${item.price} credite?`)) return;
+
+                                        const btn = e.currentTarget;
+                                        const originalText = btn.innerText;
+                                        btn.innerText = "Processing...";
+                                        btn.disabled = true;
+
+                                        try {
+                                            const res = await fetch("/api/gallery/buy-sketchfab", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    uid: item.uid || item.id,
+                                                    title: item.title,
+                                                    price: item.price,
+                                                    imageUrl: item.imageUrl
+                                                })
+                                            });
+
+                                            if (res.ok) {
+                                                alert("Model cumpărat cu succes! Îl găsești la 'Jucăriile Mele'.");
+                                                window.location.reload(); // Simple reload to refresh state
+                                            } else {
+                                                const err = await res.json();
+                                                alert(err.error || "Eroare la cumpărare");
+                                                btn.innerText = originalText;
+                                                btn.disabled = false;
+                                            }
+                                        } catch (err) {
+                                            console.error(err);
+                                            alert("Eroare de rețea");
+                                            btn.innerText = originalText;
+                                            btn.disabled = false;
+                                        }
+                                    }}
+                                    className="bg-accent text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md hover:scale-105 transition-transform flex items-center gap-1"
+                                >
+                                    <ShoppingCart className="w-4 h-4" />
+                                    Cumpără {item.price}
+                                </button>
+                            ) : (
+                                <div className="text-xl font-black text-primary">
+                                    {item.price === 0 ? "GRATUIT" : `${item.price} Credite`}
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="text-sm text-gray-500">
@@ -253,18 +301,20 @@ function GalleryCard({ item, type, onRemove }: { item: any, type: "shop" | "crea
                                 {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <X className="w-5 h-5" />}
                             </button>
                         )}
-                        <button
-                            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white transition-colors"
-                            title="Descarcă"
-                            onClick={() => {
-                                const a = document.createElement('a');
-                                a.href = item.modelUrl;
-                                a.download = `${title}.glb`;
-                                a.click();
-                            }}
-                        >
-                            <Download className="w-5 h-5" />
-                        </button>
+                        {!item.isSketchfab && (
+                            <button
+                                className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-primary hover:text-white transition-colors"
+                                title="Descarcă"
+                                onClick={() => {
+                                    const a = document.createElement('a');
+                                    a.href = item.modelUrl;
+                                    a.download = `${title}.glb`;
+                                    a.click();
+                                }}
+                            >
+                                <Download className="w-5 h-5" />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
