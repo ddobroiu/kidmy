@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ShoppingCart, User, Download, Share2, Loader2, Rocket, X } from "lucide-react";
+import { Sparkles, ShoppingCart, User, Download, Share2, Loader2, Rocket, X, Search } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -14,11 +14,27 @@ export default function GalleryPage() {
     const [items, setItems] = useState<any[]>([]); // Shop items
     const [generations, setGenerations] = useState<any[]>([]); // User generations
     const [loading, setLoading] = useState(true);
+    const [searchInput, setSearchInput] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
 
+    // Debounce Search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    // Fetch when tab or search changes
     useEffect(() => {
         const fetchGallery = async () => {
+            setLoading(true);
             try {
-                const res = await fetch("/api/gallery");
+                // If using shop, we might want to search. If creations, maybe just local filter or different endpoint?
+                // For now, API handles search for Shop Items only basically.
+                const query = activeTab === 'shop' && debouncedSearch ? `?search=${encodeURIComponent(debouncedSearch)}` : '';
+
+                const res = await fetch(`/api/gallery${query}`);
                 const data = await res.json();
                 if (data.items) setItems(data.items);
                 if (data.generations) setGenerations(data.generations);
@@ -29,7 +45,7 @@ export default function GalleryPage() {
             }
         };
         fetchGallery();
-    }, []);
+    }, [activeTab, debouncedSearch]);
 
     const handleRemoveItem = (id: string) => {
         setGenerations(prev => prev.filter(g => g.id !== id));
@@ -51,8 +67,8 @@ export default function GalleryPage() {
                     </p>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex justify-center mb-12">
+                {/* Tabs & Search */}
+                <div className="flex flex-col items-center gap-6 mb-12">
                     <div className="bg-white dark:bg-gray-900 p-1.5 rounded-2xl shadow-lg inline-flex gap-2">
                         <button
                             onClick={() => setActiveTab("creations")}
@@ -79,6 +95,21 @@ export default function GalleryPage() {
                             Magazin Premium
                         </button>
                     </div>
+
+                    {activeTab === 'shop' && (
+                        <div className="relative w-full max-w-md">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <Search className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                className="block w-full pl-10 pr-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-white dark:bg-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm shadow-sm"
+                                placeholder="Caută jucării premium..."
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Content */}

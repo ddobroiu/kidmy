@@ -6,13 +6,23 @@ export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
 
-export async function GET() {
+export async function GET(req: any) { // Type 'any' or 'NextRequest' if imported
     try {
         const session = await auth();
+        const { searchParams } = new URL(req.url);
+        const search = searchParams.get("search");
 
         // 1. Fetch Shop Items (Always available)
+        const whereClause: any = { isPublic: true };
+        if (search) {
+            whereClause.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
+            ];
+        }
+
         const items = await prisma.shopItem.findMany({
-            where: { isPublic: true },
+            where: whereClause,
             orderBy: { createdAt: 'desc' }
         });
 
