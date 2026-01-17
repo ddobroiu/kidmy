@@ -24,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 try {
                     const { host } = new URL(url);
                     // Standard Resend logic
-                    await resend.emails.send({
+                    const { data, error } = await resend.emails.send({
                         from: provider.from || "onboarding@resend.dev",
                         to: identifier,
                         subject: `Autentificare în Kidmy`,
@@ -46,6 +46,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             </body>
             `,
                     });
+
+                    if (error) {
+                        console.error("Resend error:", error);
+                        throw new Error("Failed to send verification email: " + error.message);
+                    }
+                    
+                    console.log("Verification email sent to:", identifier, "ID:", data?.id);
+
                 } catch (error) {
                     console.error("Failed to send verification email", error);
                     throw new Error("Failed to send verification email");

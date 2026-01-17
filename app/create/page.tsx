@@ -164,7 +164,7 @@ export default function CreatePage() {
                         </form>
 
                         <p className="text-xs text-gray-400 mt-4 text-center">
-                            Folosim AI avansat (Flux + Trellis) pentru a crea modelele. Durează aprox. 30-60 secunde.
+                            Folosim AI avansat pentru a crea modelele. Durează aprox. 30-60 secunde.
                         </p>
                     </motion.div>
 
