@@ -56,8 +56,10 @@ export async function GET(req: NextRequest) {
                     ACL: "public-read", // Ensure accessible if bucket is public
                 }).promise();
 
-                // Construct Public URL
-                const publicUrl = `${process.env.R2_PUBLIC_DOMAIN}/${fileKey}`;
+                // Construct Public URL (Use Internal Proxy to bypass R2 public access issues)
+                // e.g. https://www.kidmy.ro/api/storage/generations/xyz.glb
+                const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.kidmy.ro";
+                const publicUrl = `${baseUrl}/api/storage/${fileKey}`;
 
                 // Update DB
                 await prisma.generation.update({
@@ -71,7 +73,7 @@ export async function GET(req: NextRequest) {
 
                 return NextResponse.json({
                     status: "succeeded",
-                    output: { model_file: publicUrl } // Return R2 URL
+                    output: { model_file: publicUrl } // Return local proxy URL
                 });
             }
 
