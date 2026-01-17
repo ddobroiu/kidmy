@@ -22,6 +22,8 @@ export default function CreatePage() {
         setIsGenerating(true);
         setResultModel(null);
 
+        let id, generationId;
+
         try {
             // 1. Start Generation
             const res = await fetch("/api/generate", {
@@ -38,30 +40,85 @@ export default function CreatePage() {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || "A apărut o eroare la pornire.");
             }
-            const { id, generationId } = await res.json();
+            const data = await res.json();
+            id = data.id;
+            generationId = data.generationId;
 
-            // 2. Poll for status
-            const interval = setInterval(async () => {
+        } catch (err: any) {
+            console.error("Start Error:", err);
+            setIsGenerating(false);
+            alert(err.message || "Ceva nu a mers bine la pornire.");
+            return;
+        }
+
+        if (!id || !generationId) {
+            setIsGenerating(false);
+            alert("Eroare: Nu am primit ID-ul generării.");
+            return;
+        }
+
+        // 2. Poll for status
+        let attempts = 0;
+        const maxAttempts = 120; // 6 minutes max
+
+        const interval = setInterval(async () => {
+            attempts++;
+            try {
+                // We use id (from replicate) to check status. generationId is for DB update on server.
                 const statusRes = await fetch(`/api/status?id=${id}&generationId=${generationId}`);
+
+                if (!statusRes.ok) {
+                    console.error("Status check failed:", statusRes.status, statusRes.statusText);
+                    return;
+                }
+
                 const data = await statusRes.json();
+                console.log("Polling Status:", data.status, data);
 
                 if (data.status === "succeeded") {
                     clearInterval(interval);
                     setIsGenerating(false);
-                    // Trellis returns model file in output
-                    setResultModel(data.output?.model_file || data.output);
-                } else if (data.status === "failed") {
+
+                    // Logic to extract URL
+                    // data.output usually is { model_file: "url" } | "url"
+                    let finalUrl = undefined;
+
+                    if (typeof data.output === 'string') {
+                        finalUrl = data.output;
+                    } else if (data.output?.model_file) {
+                        finalUrl = data.output.model_file;
+                    } else if (data.output && typeof data.output === 'object' && Object.values(data.output).length > 0) {
+                        // Fallback: take first value if it's a string, hoping it's the url
+                        const potential = Object.values(data.output).find(v => typeof v === 'string');
+                        if (potential) finalUrl = potential as string;
+                    }
+
+                    if (finalUrl) {
+                        console.log("Generation Success. Model URL:", finalUrl);
+                        setResultModel(finalUrl);
+                    } else {
+                        console.error("Succeeded but no URL found in output:", data.output);
+                        alert("Generarea a reușit dar nu găsim fișierul. Verifică în Galerie!");
+                    }
+
+                } else if (data.status === "failed" || data.status === "canceled") {
                     clearInterval(interval);
                     setIsGenerating(false);
-                    alert("Generarea a eșuat. Încearcă altceva!");
+                    console.error("Generation Failed:", data.error);
+                    alert(`Generarea a eșuat: ${data.error || "Eroare necunoscută"}`);
+                } else {
+                    // still processing
+                    if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        setIsGenerating(false);
+                        alert("Generarea durează prea mult. Verifică mai târziu în Galerie.");
+                    }
                 }
-            }, 3000); // Check every 3s
-
-        } catch (err: any) {
-            console.error(err);
-            setIsGenerating(false);
-            alert(err.message || "Ceva nu a mers bine. Verifică consola.");
-        }
+            } catch (e) {
+                console.error("Polling Error:", e);
+                // Don't stop polling for network blips immediately, but could count errors
+            }
+        }, 3000);
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
