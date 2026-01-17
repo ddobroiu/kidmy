@@ -189,8 +189,18 @@ export default function ModelViewer({
             }, 500);
         };
 
+        const onError = (event: any) => {
+            console.error("ModelViewer Error:", event);
+            const text = progressBar.querySelector('#progress-text') as HTMLElement;
+            if (text) {
+                text.innerText = "Eroare încărcare!";
+                text.style.color = "#ff4444";
+            }
+        };
+
         el.addEventListener('progress', onProgress);
         el.addEventListener('load', onLoad);
+        el.addEventListener('error', onError);
 
         host.appendChild(el);
         viewerRef.current = el;

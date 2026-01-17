@@ -15,12 +15,16 @@ export async function GET(req: NextRequest) {
             return new NextResponse(`Failed to fetch source: ${response.statusText}`, { status: response.status });
         }
 
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
         const headers = new Headers();
         headers.set("Content-Type", response.headers.get("Content-Type") || "model/gltf-binary");
+        headers.set("Content-Length", buffer.length.toString());
         headers.set("Access-Control-Allow-Origin", "*");
         headers.set("Cache-Control", "public, max-age=31536000, mutable");
 
-        return new NextResponse(response.body, {
+        return new NextResponse(buffer, {
             status: 200,
             headers: headers
         });
