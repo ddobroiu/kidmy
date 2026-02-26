@@ -104,6 +104,37 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Learn Section Preview */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -z-10" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="bg-white dark:bg-gray-900 rounded-[3rem] p-12 border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden"
+          >
+            <div className="relative z-10 flex flex-col items-center max-w-3xl mx-auto">
+              <div className="bg-primary/20 text-primary p-4 rounded-3xl mb-8">
+                <Sparkles className="w-10 h-10" />
+              </div>
+              <h2 className="text-4xl md:text-6xl font-black mb-6">Învață Despre Animale în 3D!</h2>
+              <p className="text-xl text-gray-500 dark:text-gray-400 mb-10 leading-relaxed font-medium">
+                Explorează o lume fascinantă unde poți vedea animale reale în 3D,
+                le poți pune chiar în camera ta și poți descoperi lucruri uimitoare despre ele.
+              </p>
+              <Link
+                href="/learn"
+                className="bg-primary text-white text-xl px-12 py-5 rounded-3xl font-black shadow-xl shadow-primary/30 hover:scale-105 transition-all flex items-center gap-3"
+              >
+                Începe Aventura <ArrowRight className="w-6 h-6" />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -34,6 +34,9 @@ export default function Navbar() {
                             <Link href="/gallery" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
                                 Galerie
                             </Link>
+                            <Link href="/learn" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
+                                Lumea Animalelor
+                            </Link>
                             <Link href="/parents" className="hover:text-primary px-3 py-2 rounded-md font-bold transition-colors">
                                 Părinți
                             </Link>
@@ -90,6 +93,9 @@ export default function Navbar() {
                         </Link>
                         <Link href="/gallery" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Galerie
+                        </Link>
+                        <Link href="/learn" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
+                            Lumea Animalelor
                         </Link>
                         <Link href="/parents" className="text-gray-900 dark:text-white hover:text-primary block px-3 py-4 rounded-md text-base font-bold text-xl">
                             Părinți
