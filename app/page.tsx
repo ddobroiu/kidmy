@@ -1,135 +1,180 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles, Pencil, Gamepad2, Wand2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, Sparkles, Pencil, Gamepad2, Wand2, Star, Zap, Rocket } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function Home() {
-  return (
-    <div className="overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        {/* Background decorative blobs */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 bg-white dark:bg-black/90">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-purple-400/30 rounded-full blur-[100px]" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-blue-400/30 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-400/20 rounded-full blur-[120px]" />
-        </div>
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-[var(--background)]">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-secondary/10 rounded-full blur-[100px]" />
+      </div>
+
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 pb-20 px-4 overflow-hidden">
+        <motion.div
+          style={{ opacity, scale }}
+          className="max-w-5xl mx-auto text-center relative z-10"
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-8 text-sm font-bold text-primary shadow-sm"
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 glass px-5 py-2 rounded-full mb-8 text-sm font-bold text-primary shadow-premium border-primary/20"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Magia 3D este aici!</span>
+            <span className="tracking-wide uppercase text-[10px]">Viitorul Creativității este Aici</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-black mb-6 tracking-tight"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="text-6xl md:text-8xl font-black mb-8 tracking-tight leading-[1.1]"
           >
-            Dă Vieță <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">Imaginației Tale</span>
+            Dă Vieță <br />
+            <span className="magic-text">Imaginației Tale</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
           >
-            Crează personaje unice, transformă desenele în modele 3D reale și joacă-te cu ele în Realitate Augmentată!
+            Cea mai avansată platformă pentru micii creatori. Transformă ideile în 3D cu puterea AI și explorează universuri noi în Realitate Augmentată.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6"
           >
             <Link
               href="/create"
-              className="bg-primary hover:bg-primary/90 text-white text-xl px-10 py-4 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center"
+              className="magic-bg hover:opacity-90 text-white text-xl px-12 py-5 rounded-2xl font-black shadow-magic transition-all hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center group"
             >
-              <Wand2 className="w-6 h-6" />
-              Creează Acum
+              <Wand2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              Începe să Creezi
             </Link>
             <Link
               href="/gallery"
-              className="bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 text-xl px-10 py-4 rounded-2xl font-bold transition-all hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center"
+              className="glass hover:bg-white/50 dark:hover:bg-white/10 text-foreground text-xl px-12 py-5 rounded-2xl font-black transition-all hover:scale-105 flex items-center gap-3 w-full sm:w-auto justify-center border-white/40 shadow-premium"
             >
-              Vezi Galerie
+              Exemple Magice
             </Link>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Floating 3D Elements Placeholder */}
-        {/* We can add actual 3D elements here later */}
+        {/* Hero Decorative Elements */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="absolute inset-0 pointer-events-none"
+        >
+          <FloatingElement icon={<Star className="text-secondary" />} delay={0} top="20%" left="15%" />
+          <FloatingElement icon={<Zap className="text-accent" />} delay={1} top="60%" left="10%" />
+          <FloatingElement icon={<Rocket className="text-primary" />} delay={2} top="30%" right="15%" />
+          <FloatingElement icon={<Sparkles className="text-primary" />} delay={0.5} bottom="20%" right="10%" />
+        </motion.div>
+      </section>
+
+      {/* Stats/Social Proof (Makes it look profi) */}
+      <section className="py-12 border-y border-border/50 bg-white/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <StatItem label="Modele Create" value="10k+" />
+          <StatItem label="Mici Artiști" value="2.5k" />
+          <StatItem label="Lecții Interactive" value="50+" />
+          <StatItem label="Rating Părinți" value="4.9/5" />
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50 dark:bg-black/50">
+      <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black mb-4">Cum Funcționează?</h2>
-            <p className="text-gray-500 text-lg">Este super simplu să devii un creator 3D!</p>
+          <div className="text-center mb-24">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              className="text-4xl md:text-6xl font-black mb-6"
+            >
+              Cum aducem <span className="text-primary">Magia</span>?
+            </motion.h2>
+            <p className="text-muted-foreground text-xl max-w-2xl mx-auto font-medium">
+              Tehnologie de ultimă oră pusă în mâinile copiilor, într-un mod sigur și distractiv.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1 */}
+          <div className="grid md:grid-cols-3 gap-10">
             <FeatureCard
-              icon={<Pencil className="w-8 h-8 text-white" />}
-              color="bg-purple-500"
-              title="1. Descrie sau Desenează"
-              description="Scrie o descriere amuzantă sau încarcă un desen făcut de tine."
+              icon={<Pencil className="w-10 h-10 text-white" />}
+              color="bg-primary"
+              title="Ideea Ta"
+              description="Scrie un text sau încarcă un desen. AI-ul nostru înțelege imediat conceptul tău unic."
+              delay={0}
             />
-            {/* Card 2 */}
             <FeatureCard
-              icon={<Sparkles className="w-8 h-8 text-white" />}
-              color="bg-pink-500"
-              title="2. Magia AI"
-              description="Inteligența noastră artificială transformă ideea ta într-un model 3D în câteva secunde."
+              icon={<Sparkles className="w-10 h-10 text-white" />}
+              color="bg-accent"
+              title="Transformare 3D"
+              description="În mai puțin de un minut, schița ta devine un obiect 3D complet, cu texturi și detalii incredibile."
+              delay={0.2}
             />
-            {/* Card 3 */}
             <FeatureCard
-              icon={<Gamepad2 className="w-8 h-8 text-white" />}
-              color="bg-yellow-500"
-              title="3. Joacă-te!"
-              description="Vezi personajul în camera ta cu AR sau descarcă-l pentru jocuri."
+              icon={<Gamepad2 className="w-10 h-10 text-white" />}
+              color="bg-secondary"
+              title="Joacă și AR"
+              description="Proiectează creația în camera ta folosind Realitatea Augmentată sau ia-o cu tine în jocuri."
+              delay={0.4}
             />
           </div>
         </div>
       </section>
 
-      {/* Learn Section Preview */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -z-10" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* CTA Section - The "Learn" preview enhanced */}
+      <section className="py-32 px-4">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="bg-white dark:bg-gray-900 rounded-[3rem] p-12 border border-gray-100 dark:border-white/5 shadow-2xl relative overflow-hidden"
+            className="magic-bg rounded-[4rem] p-12 md:p-24 shadow-magic relative overflow-hidden text-white group"
           >
-            <div className="relative z-10 flex flex-col items-center max-w-3xl mx-auto">
-              <div className="bg-primary/20 text-primary p-4 rounded-3xl mb-8">
-                <Sparkles className="w-10 h-10" />
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black mb-6">Învață Despre Animale în 3D!</h2>
-              <p className="text-xl text-gray-500 dark:text-gray-400 mb-10 leading-relaxed font-medium">
-                Explorează o lume fascinantă unde poți vedea animale reale în 3D,
-                le poți pune chiar în camera ta și poți descoperi lucruri uimitoare despre ele.
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-white/10 -skew-x-12 translate-x-20 transition-transform group-hover:translate-x-10 duration-700" />
+
+            <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto">
+              <span className="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest mb-8">
+                Lumea Cunoașterii
+              </span>
+              <h2 className="text-5xl md:text-7xl font-black mb-8 leading-tight">
+                Învață Prin Experiențe 3D
+              </h2>
+              <p className="text-xl md:text-2xl text-white/80 mb-12 leading-relaxed font-medium">
+                Nu doar creezi, ci și descoperi! Explorează modele 3D ale animalelor reale,
+                ascultă poveștile lor și devino un expert al naturii.
               </p>
               <Link
                 href="/learn"
-                className="bg-primary text-white text-xl px-12 py-5 rounded-3xl font-black shadow-xl shadow-primary/30 hover:scale-105 transition-all flex items-center gap-3"
+                className="bg-white text-primary text-2xl px-16 py-6 rounded-3xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4"
               >
-                Începe Aventura <ArrowRight className="w-6 h-6" />
+                Începe Aventura <ArrowRight className="w-8 h-8" />
               </Link>
             </div>
           </motion.div>
@@ -139,17 +184,52 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, description, color }: { icon: React.ReactNode, title: string, description: string, color: string }) {
+function FloatingElement({ icon, top, left, right, bottom, delay }: any) {
   return (
     <motion.div
-      whileHover={{ y: -10 }}
-      className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none"
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: [0.4, 0.8, 0.4],
+        y: [0, -20, 0],
+        rotate: [0, 10, -10, 0]
+      }}
+      transition={{
+        duration: 5,
+        repeat: Infinity,
+        delay
+      }}
+      className="absolute p-4 glass rounded-2xl shadow-premium"
+      style={{ top, left, right, bottom }}
     >
-      <div className={`${color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg rotate-3`}>
+      {icon}
+    </motion.div>
+  );
+}
+
+function StatItem({ label, value }: { label: string, value: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-3xl font-black text-foreground">{value}</span>
+      <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{label}</span>
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, description, color, delay }: { icon: React.ReactNode, title: string, description: string, color: string, delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.6 }}
+      whileHover={{ y: -15, transition: { duration: 0.2 } }}
+      className="glass border-white/40 p-10 rounded-[3rem] shadow-premium group"
+    >
+      <div className={`${color} w-20 h-20 rounded-3xl flex items-center justify-center mb-10 shadow-lg -rotate-6 group-hover:rotate-6 transition-transform duration-500`}>
         {icon}
       </div>
-      <h3 className="text-2xl font-bold mb-3">{title}</h3>
-      <p className="text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+      <h3 className="text-3xl font-black mb-4 group-hover:text-primary transition-colors">{title}</h3>
+      <p className="text-muted-foreground text-lg font-medium leading-relaxed">
         {description}
       </p>
     </motion.div>
