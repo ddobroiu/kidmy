@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { Sparkles, Pencil, Image as ImageIcon, Rocket, Loader2, RotateCcw } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles, Pencil, Image as ImageIcon, Rocket, Loader2, RotateCcw, Zap, Wand2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
-
 
 export default function CreatePage() {
     const [mode, setMode] = useState<"text" | "image">("text");
@@ -25,7 +24,6 @@ export default function CreatePage() {
         let id, generationId;
 
         try {
-            // 1. Start Generation
             const res = await fetch("/api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -57,57 +55,35 @@ export default function CreatePage() {
             return;
         }
 
-        // 2. Poll for status
         let attempts = 0;
-        const maxAttempts = 120; // 6 minutes max
+        const maxAttempts = 120;
 
         const interval = setInterval(async () => {
             attempts++;
             try {
-                // We use id (from replicate) to check status. generationId is for DB update on server.
                 const statusRes = await fetch(`/api/status?id=${id}&generationId=${generationId}`);
-
-                if (!statusRes.ok) {
-                    console.error("Status check failed:", statusRes.status, statusRes.statusText);
-                    return;
-                }
+                if (!statusRes.ok) return;
 
                 const data = await statusRes.json();
-                console.log("Polling Status:", data.status, data);
-
                 if (data.status === "succeeded") {
                     clearInterval(interval);
                     setIsGenerating(false);
-
-                    // Logic to extract URL
-                    // data.output usually is { model_file: "url" } | "url"
                     let finalUrl = undefined;
-
-                    if (typeof data.output === 'string') {
-                        finalUrl = data.output;
-                    } else if (data.output?.model_file) {
-                        finalUrl = data.output.model_file;
-                    } else if (data.output && typeof data.output === 'object' && Object.values(data.output).length > 0) {
-                        // Fallback: take first value if it's a string, hoping it's the url
+                    if (typeof data.output === 'string') finalUrl = data.output;
+                    else if (data.output?.model_file) finalUrl = data.output.model_file;
+                    else if (data.output && typeof data.output === 'object' && Object.values(data.output).length > 0) {
                         const potential = Object.values(data.output).find(v => typeof v === 'string');
                         if (potential) finalUrl = potential as string;
                     }
 
-                    if (finalUrl) {
-                        console.log("Generation Success. Model URL:", finalUrl);
-                        setResultModel(finalUrl);
-                    } else {
-                        console.error("Succeeded but no URL found in output:", data.output);
-                        alert("Generarea a reușit dar nu găsim fișierul. Verifică în Galerie!");
-                    }
+                    if (finalUrl) setResultModel(finalUrl);
+                    else alert("Generarea a reușit dar nu găsim fișierul. Verifică în Galerie!");
 
                 } else if (data.status === "failed" || data.status === "canceled") {
                     clearInterval(interval);
                     setIsGenerating(false);
-                    console.error("Generation Failed:", data.error);
                     alert(`Generarea a eșuat: ${data.error || "Eroare necunoscută"}`);
                 } else {
-                    // still processing
                     if (attempts >= maxAttempts) {
                         clearInterval(interval);
                         setIsGenerating(false);
@@ -116,7 +92,6 @@ export default function CreatePage() {
                 }
             } catch (e) {
                 console.error("Polling Error:", e);
-                // Don't stop polling for network blips immediately, but could count errors
             }
         }, 3000);
     };
@@ -124,76 +99,96 @@ export default function CreatePage() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setImageFile(e.target.files[0]);
-            // In a real app, we would upload this to R2/S3 here
             setPreviewUrl(URL.createObjectURL(e.target.files[0]));
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black/50 py-12">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8 relative">
+            {/* Background */}
+            <div className="fixed inset-0 -z-10 bg-[var(--background)]">
+                <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-accent/5 rounded-full blur-[100px]" />
+            </div>
 
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                        Atelierul Magic
+            <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-16">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-2 glass px-6 py-2 rounded-full mb-6 text-sm font-black text-primary border-primary/20 shadow-premium"
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        <span className="uppercase tracking-widest text-[10px]">Laboratorul de Creație</span>
+                    </motion.div>
+                    <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+                        Atelierul <span className="magic-text">Magic</span>
                     </h1>
-                    <p className="text-gray-500 text-lg">
-                        Alege cum vrei să creezi personajul tău!
+                    <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                        Aici ideile tale devin realitate. Scrie ce vrei să creezi și AI-ul se ocupă de restul!
                     </p>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-12">
+                <div className="grid lg:grid-cols-2 gap-12 items-stretch">
                     {/* Creation Panel */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-8 shadow-xl"
+                        className="glass border-white/40 rounded-[3rem] p-10 shadow-premium flex flex-col"
                     >
                         {/* Mode Switcher */}
-                        <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mb-8">
+                        <div className="flex gap-3 bg-muted/50 p-2 rounded-[1.5rem] mb-10 border border-border/50">
                             <button
                                 onClick={() => setMode("text")}
                                 className={cn(
-                                    "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all",
-                                    mode === "text" ? "bg-white dark:bg-gray-700 shadow-sm text-primary" : "text-gray-500 hover:text-gray-900"
+                                    "flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-black transition-all",
+                                    mode === "text" ? "bg-white dark:bg-white/10 shadow-premium text-primary" : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
-                                <Pencil className="w-4 h-4" />
+                                <Pencil className="w-5 h-5" />
                                 Scrie Povestea
                             </button>
                             <button
                                 onClick={() => setMode("image")}
-                                title="Momentan doar Text funcționează complet automat"
                                 className={cn(
-                                    "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all opacity-50 cursor-not-allowed",
-                                    mode === "image" ? "bg-white dark:bg-gray-700 shadow-sm text-primary" : "text-gray-500 hover:text-gray-900"
+                                    "flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-black transition-all",
+                                    mode === "image" ? "bg-white dark:bg-white/10 shadow-premium text-primary" : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
-                                <ImageIcon className="w-4 h-4" />
-                                Încarcă Poza (Prototip)
+                                <ImageIcon className="w-5 h-5" />
+                                Încarcă Poza
                             </button>
                         </div>
 
-                        <form onSubmit={handleGenerate} className="space-y-6">
+                        <form onSubmit={handleGenerate} className="space-y-8 flex-grow flex flex-col">
                             {mode === "text" ? (
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Descrie personajul tău</label>
+                                <div className="flex-grow flex flex-col">
+                                    <label className="text-lg font-black mb-4 flex items-center gap-2">
+                                        <Wand2 className="w-5 h-5 text-primary" />
+                                        Ce vrei să construim astăzi?
+                                    </label>
                                     <textarea
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
-                                        placeholder="Un robot prietenos care iubește înghețata..."
-                                        className="w-full h-40 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:border-primary focus:ring-0 resize-none text-lg"
+                                        placeholder="Un astronaut micuț care stă pe o lună de brânză..."
+                                        className="w-full flex-grow p-6 rounded-[2rem] border-2 border-dashed border-border/50 bg-white/30 dark:bg-black/20 focus:border-primary focus:ring-0 resize-none text-xl font-medium outline-none transition-all"
                                     />
                                 </div>
                             ) : (
-                                <div>
-                                    <label className="block w-full h-64 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative overflow-hidden group">
+                                <div className="flex-grow">
+                                    <label className="text-lg font-black mb-4 flex items-center gap-2">
+                                        <ImageIcon className="w-5 h-5 text-accent" />
+                                        Transformă desenul în 3D
+                                    </label>
+                                    <label className="block w-full h-80 border-2 border-dashed border-border/50 rounded-[2.5rem] cursor-pointer hover:bg-white/40 dark:hover:bg-black/30 transition-all relative overflow-hidden group">
                                         {previewUrl ? (
-                                            <img src={previewUrl} className="w-full h-full object-contain" />
+                                            <img src={previewUrl} className="w-full h-full object-contain p-4" />
                                         ) : (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                                                <ImageIcon className="w-12 h-12 mb-2 group-hover:scale-110 transition-transform" />
-                                                <span>Apasă pentru a încărca</span>
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                                                <div className="p-5 glass rounded-2xl mb-4 group-hover:scale-110 transition-transform shadow-premium">
+                                                    <ImageIcon className="w-10 h-10 text-primary" />
+                                                </div>
+                                                <span className="font-black">Apasă pentru a alege imaginea</span>
                                             </div>
                                         )}
                                         <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
@@ -201,59 +196,83 @@ export default function CreatePage() {
                                 </div>
                             )}
 
-                            <button
-                                type="submit"
-                                disabled={isGenerating || (mode === 'text' && !prompt)}
-                                className="w-full py-4 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isGenerating ? (
-                                    <>
-                                        <Loader2 className="animate-spin" />
-                                        Se Magicianizează...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Rocket />
-                                        Generează!
-                                    </>
-                                )}
-                            </button>
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={isGenerating || (mode === 'text' && !prompt)}
+                                    className="w-full py-6 magic-bg text-white rounded-3xl font-black text-2xl shadow-magic hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4 group"
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <Loader2 className="animate-spin w-8 h-8" />
+                                            <span>Se Magicianizează...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Zap className="w-7 h-7 group-hover:fill-current transition-all" />
+                                            <span>Generează Acum!</span>
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-center text-sm font-bold text-muted-foreground mt-6 flex items-center justify-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-secondary" />
+                                    AI-ul funcționează. Durează aprox. 60 secunde.
+                                </p>
+                            </div>
                         </form>
-
-                        <p className="text-xs text-gray-400 mt-4 text-center">
-                            Folosim AI avansat pentru a crea modelele. Durează aprox. 30-60 secunde.
-                        </p>
                     </motion.div>
 
                     {/* Preview Panel */}
-                    <div className="h-[500px] lg:h-auto bg-gray-200 dark:bg-gray-800 rounded-3xl overflow-hidden relative border border-white/10">
-                        {resultModel ? (
-                            <>
-                                <ModelViewer url={resultModel} />
-                                <button
-                                    onClick={() => setResultModel(null)}
-                                    className="absolute top-4 left-4 bg-white/20 backdrop-blur text-white p-2 rounded-lg hover:bg-white/30 transition-colors"
+                    <div className="glass border-white/40 rounded-[3rem] overflow-hidden relative shadow-premium min-h-[500px]">
+                        <AnimatePresence mode="wait">
+                            {resultModel ? (
+                                <motion.div
+                                    key="result"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="w-full h-full"
                                 >
-                                    <RotateCcw className="w-5 h-5" />
-                                </button>
-                            </>
-                        ) : (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-8 text-center opacity-50">
-                                <Sparkles className="w-16 h-16 mb-4" />
-                                <p className="text-xl font-bold">Magia va apărea aici!</p>
-                            </div>
-                        )}
-
-                        {isGenerating && (
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white z-10">
-                                <div className="text-4xl animate-bounce mb-4">🎨</div>
-                                <p className="text-2xl font-bold">Pictăm în 3D...</p>
-                                <p className="text-sm opacity-80 mt-2">AI-ul lucrează... ai răbdare!</p>
-                            </div>
-                        )}
+                                    <ModelViewer url={resultModel} />
+                                    <button
+                                        onClick={() => setResultModel(null)}
+                                        className="absolute top-8 left-8 glass border-white/20 p-4 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-premium"
+                                    >
+                                        <RotateCcw className="w-6 h-6" />
+                                    </button>
+                                </motion.div>
+                            ) : isGenerating ? (
+                                <motion.div
+                                    key="loading"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 bg-black/40 backdrop-blur-md flex flex-col items-center justify-center text-white z-20"
+                                >
+                                    <div className="text-6xl animate-bounce mb-8">🎨</div>
+                                    <h2 className="text-4xl font-black mb-4">Pictăm în 3D...</h2>
+                                    <div className="flex gap-1">
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="placeholder"
+                                    className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-12 text-center"
+                                >
+                                    <div className="w-32 h-32 glass rounded-[2.5rem] flex items-center justify-center mb-8 border-white/20 opacity-50">
+                                        <Wand2 className="w-16 h-16" />
+                                    </div>
+                                    <p className="text-3xl font-black mb-4">Așteptăm Magia</p>
+                                    <p className="text-lg font-medium max-w-xs">
+                                        Completează formularul din stânga pentru a vedea cum ideea ta prinde viață aici!
+                                    </p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
-
             </div>
         </div>
     );

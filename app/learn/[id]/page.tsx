@@ -5,9 +5,10 @@ import { animals } from "@/lib/animals";
 import ModelViewer from "@/components/ModelViewer";
 import StoryNarrator from "@/components/StoryNarrator";
 import Link from "next/link";
-import { ChevronLeft, Info, Sparkles, Wand2 } from "lucide-react";
+import { ChevronLeft, Info, Sparkles, Wand2, Star, Target } from "lucide-react";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function AnimalDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -16,33 +17,34 @@ export default function AnimalDetail({ params }: { params: Promise<{ id: string 
     if (!animal) return notFound();
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black/95">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8 relative">
+            {/* Background elements */}
+            <div className="fixed inset-0 -z-10 overflow-hidden">
+                <div className={cn("absolute top-0 right-0 w-[50%] h-[50%] rounded-full blur-[150px] opacity-20", animal.color)} />
+                <div className={cn("absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full blur-[120px] opacity-10", animal.color)} />
+            </div>
+
+            <div className="max-w-7xl mx-auto">
                 {/* Header/Back Button */}
                 <Link
                     href="/learn"
-                    className="inline-flex items-center gap-2 text-gray-500 hover:text-primary mb-8 font-black transition-colors group"
+                    className="inline-flex items-center gap-3 text-muted-foreground hover:text-primary mb-12 font-black transition-all group px-4 py-2 glass rounded-2xl border-white/20 shadow-premium"
                 >
-                    <div className="bg-white dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-white/10 group-hover:bg-primary group-hover:text-white transition-all">
-                        <ChevronLeft className="w-6 h-6" />
-                    </div>
-                    Inapoi la Lumea Animalelor
+                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                    Înapoi la Școală
                 </Link>
 
-                <div className="grid lg:grid-cols-2 gap-12 items-start">
-                    {/* Left Side: 3D Model */}
+                <div className="grid lg:grid-cols-2 gap-16 items-start">
+                    {/* Left Side: 3D Model Container */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="relative rounded-[3rem] overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 shadow-2xl h-[400px] md:h-[600px] lg:h-[700px]"
+                        className="relative rounded-[4rem] overflow-hidden glass border-white/40 shadow-magic h-[500px] md:h-[650px] lg:h-[750px] group"
                     >
-                        <div className={`absolute -top-40 -left-40 w-96 h-96 rounded-full blur-[100px] opacity-20 ${animal.color}`} />
-                        <div className={`absolute -bottom-40 -right-40 w-96 h-96 rounded-full blur-[100px] opacity-20 ${animal.color}`} />
-
-                        <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
-                            <div className="bg-white/80 dark:bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-primary" />
-                                <span className="text-xs font-black uppercase tracking-wider">Vizualizare 3D Activa</span>
+                        <div className="absolute top-8 left-8 z-10 flex flex-col gap-3">
+                            <div className="glass px-5 py-2.5 rounded-full border-white/40 shadow-premium flex items-center gap-3">
+                                <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-foreground">Vizualizare 3D Activă</span>
                             </div>
                         </div>
 
@@ -53,19 +55,27 @@ export default function AnimalDetail({ params }: { params: Promise<{ id: string 
                             showArButton={true}
                             backgroundColor="transparent"
                         />
+
+                        {/* AR Button Overlay Hint */}
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            <div className="glass px-6 py-3 rounded-2xl border-white/40 shadow-premium text-sm font-black flex items-center gap-2">
+                                <Target className="w-4 h-4 text-primary" />
+                                Roteste sau adu-l in camera ta
+                            </div>
+                        </div>
                     </motion.div>
 
                     {/* Right Side: Info & Facts */}
-                    <div className="flex flex-col gap-8">
+                    <div className="flex flex-col gap-10">
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
                         >
-                            <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
+                            <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-tight">
                                 {animal.name}
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium leading-relaxed mb-6">
+                            <p className="text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed mb-6">
                                 {animal.description}
                             </p>
                         </motion.div>
@@ -74,26 +84,28 @@ export default function AnimalDetail({ params }: { params: Promise<{ id: string 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
-                            className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-200 dark:border-white/10 shadow-xl"
+                            className="glass rounded-[3rem] p-10 border-white/40 shadow-premium relative overflow-hidden"
                         >
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className={`${animal.color} p-4 rounded-2xl shadow-lg ring-4 ring-white dark:ring-white/5`}>
-                                    <Info className="w-8 h-8 text-white" />
+                            <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-20", animal.color)} />
+
+                            <div className="flex items-center gap-5 mb-10 relative z-10">
+                                <div className={cn("p-5 rounded-[1.5rem] shadow-lg ring-4 ring-white/10 text-white", animal.color)}>
+                                    <Info className="w-10 h-10" />
                                 </div>
-                                <h2 className="text-3xl font-black">Știai că?</h2>
+                                <h2 className="text-4xl font-black tracking-tight italic">Știai că... ?</h2>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-6 relative z-10">
                                 {animal.facts.map((fact, index) => (
                                     <motion.div
                                         key={index}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.4 + (index * 0.1) }}
-                                        className="flex items-start gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-primary/20 hover:bg-white dark:hover:bg-primary/5 transition-all group"
+                                        className="flex items-start gap-5 p-6 rounded-3xl bg-muted/30 border border-transparent hover:border-primary/20 hover:bg-white dark:hover:bg-white/5 transition-all group"
                                     >
-                                        <div className="mt-1.5 w-2.5 h-2.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
-                                        <p className="text-lg font-bold text-gray-600 dark:text-gray-300">
+                                        <div className="mt-2 w-3 h-3 rounded-full bg-primary shrink-0 group-hover:scale-150 transition-transform shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                                        <p className="text-xl font-bold text-foreground leading-snug">
                                             {fact}
                                         </p>
                                     </motion.div>
@@ -111,14 +123,14 @@ export default function AnimalDetail({ params }: { params: Promise<{ id: string 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.6 }}
-                            className="flex flex-col sm:flex-row gap-4 mt-8"
+                            className="pt-6"
                         >
                             <Link
                                 href="/create"
-                                className="bg-white/80 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 text-gray-900 dark:text-white px-8 py-5 rounded-2xl text-xl font-bold shadow-xl border border-gray-200 dark:border-white/10 transition-all hover:scale-105 flex items-center justify-center gap-3 w-full"
+                                className="glass hover:bg-white/40 text-foreground px-10 py-6 rounded-[2.5rem] text-2xl font-black shadow-premium border-white/40 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-4 w-full group"
                             >
-                                <Wand2 className="w-6 h-6" />
-                                Creează propriul tău animal
+                                <Wand2 className="w-7 h-7 text-primary group-hover:rotate-12 transition-transform" />
+                                Creează propriul tău {animal.name}
                             </Link>
                         </motion.div>
                     </div>
