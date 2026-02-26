@@ -86,90 +86,99 @@ export default function ModelViewer({
         el.setAttribute("src", proxiedUrl);
         if (poster) el.setAttribute("poster", poster);
         el.setAttribute("camera-controls", "");
-        el.setAttribute("shadow-intensity", "1");
-        el.setAttribute("shadow-softness", "1"); // Softer shadows
+        el.setAttribute("shadow-intensity", "1.5");
+        el.setAttribute("shadow-softness", "1");
         el.setAttribute("auto-rotate", "");
-        el.setAttribute("tone-mapping", "aces"); // Cinematic looking
-        el.setAttribute("environment-image", "neutral"); // Better lighting
-        el.setAttribute("autoplay", ""); // Auto-play animations
-        el.setAttribute("animation-crossfade-duration", "1000"); // Smooth transitions
+        el.setAttribute("tone-mapping", "aces");
+        el.setAttribute("environment-image", "neutral");
+        el.setAttribute("autoplay", "");
+        el.setAttribute("animation-crossfade-duration", "1000");
+
         if (showArButton) {
             el.setAttribute("ar", "");
+            // Recommended order: webxr first for modern browsers, then scene-viewer for android, then quick-look for ios
             el.setAttribute("ar-modes", "webxr scene-viewer quick-look");
+            el.setAttribute("ar-scale", "auto");
+            el.setAttribute("ar-placement", "floor");
         }
+
         el.style.width = "100%";
         el.style.height = "100%";
         el.setAttribute("exposure", String(exposure));
         el.style.backgroundColor = bgColor;
 
-        // Custom AR Button
+        // Custom AR Button - Enhanced for visibility
         const arButton = document.createElement("button");
         arButton.slot = "ar-button";
         arButton.style.cssText = `
-      position: absolute; 
-      top: 16px; 
-      right: 16px; 
-      background-color: rgba(255, 255, 255, 0.9); 
-      color: black; 
-      border-radius: 12px; 
-      border: none; 
-      padding: 6px 12px; 
-      font-weight: bold; 
-      font-family: sans-serif; 
-      font-size: 11px; 
-      cursor: pointer; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-      z-index: 1000; 
-      display: flex; 
-      align-items: center; 
-      gap: 6px;
-      transform: translate(0, 0);
-    `;
+            position: absolute; 
+            bottom: 24px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white; 
+            border-radius: 100px; 
+            border: none; 
+            padding: 12px 24px; 
+            font-weight: 900; 
+            font-family: inherit; 
+            font-size: 14px; 
+            cursor: pointer; 
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5); 
+            z-index: 1000; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        `;
         arButton.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-      </svg>
-      Vezi în AR
-    `;
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            Adu-l în camera ta
+        `;
         el.appendChild(arButton);
 
         // Custom Progress Bar
         const progressBar = document.createElement("div");
         progressBar.slot = "progress-bar";
         progressBar.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 200px;
-        background: rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 16px;
-        border-radius: 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        pointer-events: none;
-        backdrop-filter: blur(8px);
-        transition: opacity 0.3s;
-        z-index: 100;
-    `;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+            backdrop-filter: blur(12px);
+            transition: opacity 0.3s;
+            z-index: 100;
+        `;
 
         progressBar.innerHTML = `
-        <div style="font-family: sans-serif; font-size: 12px; font-weight: bold; color: white; display: flex; align-items: center; gap: 8px;">
-            <svg class="spinner" viewBox="0 0 50 50" style="width: 14px; height: 14px; animation: spin 1s linear infinite;">
-                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" style="opacity: 0.3"></circle>
-                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="80" stroke-dashoffset="60"></circle>
-            </svg>
-            <span id="progress-text">Se încarcă... 0%</span>
-        </div>
-        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
-            <div id="progress-fill" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.1s;"></div>
-        </div>
-    `;
+            <div style="font-family: inherit; font-size: 14px; font-weight: 900; color: white; display: flex; align-items: center; gap: 10px;">
+                <svg class="spinner" viewBox="0 0 50 50" style="width: 18px; height: 18px; animation: spin 1s linear infinite;">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" style="opacity: 0.3"></circle>
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="80" stroke-dashoffset="60"></circle>
+                </svg>
+                <span id="progress-text">Se încarcă magia... 0%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                <div id="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(to right, #6366f1, #a855f7); transition: width 0.1s;"></div>
+            </div>
+        `;
 
         el.appendChild(progressBar);
 
@@ -179,7 +188,7 @@ export default function ModelViewer({
             const fill = progressBar.querySelector('#progress-fill') as HTMLElement;
             const text = progressBar.querySelector('#progress-text') as HTMLElement;
             if (fill) fill.style.width = `${percentage}%`;
-            if (text) text.innerText = `Se încarcă... ${Math.round(percentage)}%`;
+            if (text) text.innerText = `Se încarcă magia... ${Math.round(percentage)}%`;
         };
 
         const onLoad = () => {
@@ -193,8 +202,8 @@ export default function ModelViewer({
             console.error("ModelViewer Error:", event);
             const text = progressBar.querySelector('#progress-text') as HTMLElement;
             if (text) {
-                text.innerText = "Eroare încărcare!";
-                text.style.color = "#ff4444";
+                text.innerText = "Hopa! Ceva n-a mers.";
+                text.style.color = "#ef4444";
             }
         };
 
@@ -216,14 +225,13 @@ export default function ModelViewer({
         if (viewerRef.current) {
             viewerRef.current.setAttribute("exposure", String(exposure));
 
-            // Fix background application
+            // Fix background application - always keep environment-image for lighting
             if (bgColor === 'transparent') {
                 viewerRef.current.style.backgroundColor = 'transparent';
-                viewerRef.current.removeAttribute('environment-image');
             } else {
                 viewerRef.current.style.backgroundColor = bgColor;
-                viewerRef.current.setAttribute('environment-image', 'neutral');
             }
+            viewerRef.current.setAttribute('environment-image', 'neutral');
         }
     }, [exposure, bgColor]);
 

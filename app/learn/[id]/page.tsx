@@ -55,14 +55,6 @@ export default function AnimalDetail({ params }: { params: Promise<{ id: string 
                             showArButton={true}
                             backgroundColor="transparent"
                         />
-
-                        {/* AR Button Overlay Hint */}
-                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                            <div className="glass px-6 py-3 rounded-2xl border-white/40 shadow-premium text-sm font-black flex items-center gap-2">
-                                <Target className="w-4 h-4 text-primary" />
-                                Roteste sau adu-l in camera ta
-                            </div>
-                        </div>
                     </motion.div>
 
                     {/* Right Side: Info & Facts */}
