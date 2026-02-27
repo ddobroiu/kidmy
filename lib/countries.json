@@ -1,0 +1,62 @@
+[
+    {
+        "name": "România",
+        "code": "RO"
+    },
+    {
+        "name": "Moldova",
+        "code": "MD"
+    },
+    {
+        "name": "Germania",
+        "code": "DE"
+    },
+    {
+        "name": "Marea Britanie",
+        "code": "GB"
+    },
+    {
+        "name": "Statele Unite",
+        "code": "US"
+    },
+    {
+        "name": "Franța",
+        "code": "FR"
+    },
+    {
+        "name": "Italia",
+        "code": "IT"
+    },
+    {
+        "name": "Spania",
+        "code": "ES"
+    },
+    {
+        "name": "Ungaria",
+        "code": "HU"
+    },
+    {
+        "name": "Bulgaria",
+        "code": "BG"
+    },
+    {
+        "name": "Austria",
+        "code": "AT"
+    },
+    {
+        "name": "Belgia",
+        "code": "BE"
+    },
+    {
+        "name": "Olanda",
+        "code": "NL"
+    },
+    {
+        "name": "Turcia",
+        "code": "TR"
+    },
+    {
+        "name": "Grecia",
+        "code": "GR"
+    }
+]
