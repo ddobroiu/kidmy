@@ -41,6 +41,12 @@ export default function ParentsDashboard() {
     };
 
     const handlePurchase = async (packageId: string) => {
+        if (!billingDetails) {
+            setIsBillingModalOpen(true);
+            alert("Vă rugăm să completați datele de facturare înainte de a efectua o plată.");
+            return;
+        }
+
         setPurchasing(packageId);
 
         try {
