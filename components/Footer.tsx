@@ -13,6 +13,7 @@ export default function Footer() {
                 { name: "Creează", href: "/create" },
                 { name: "Galerie", href: "/gallery" },
                 { name: "Enciclopedie 3D", href: "/learn" },
+                { name: "Blog Educațional", href: "/blog" },
             ],
         },
         {

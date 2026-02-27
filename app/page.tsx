@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles, Pencil, Gamepad2, Wand2, Star, Zap, Rocket, Brain, Shield, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Pencil, Gamepad2, Wand2, Star, Zap, Rocket, Brain, Shield, Play, ChevronRight } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { blogPosts } from "@/lib/blog-data";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -289,6 +290,54 @@ export default function Home() {
               Începe Gratuit Acum
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Blog Section Preview */}
+      <section className="py-24 bg-gray-50/50 dark:bg-black/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">Sfaturi și Noutăți</h2>
+            <p className="text-gray-500 font-medium">Descoperă cum tehnologia 3D transformă viitorul copiilor.</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {blogPosts.slice(0, 3).map((post) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-xl border border-gray-100 dark:border-white/5 group"
+              >
+                <Link href={`/blog/${post.slug}`}>
+                  <div className="h-48 overflow-hidden">
+                    <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-black mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm line-clamp-3 mb-6">
+                      {post.excerpt}
+                    </p>
+                    <span className="text-primary font-black text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+                      Citește mai mult <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-primary font-black transition-colors"
+            >
+              Vezi tot blogul <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
     </div>
