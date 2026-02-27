@@ -79,18 +79,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         data: {
                             email: credentials.email as string,
                             passwordHash: hashedPassword,
-                            credits: 10,
+                            credits: 0, // No credits until verified
                         }
-                    });
-
-                    // Add bonus credits
-                    await prisma.creditTransaction.create({
-                        data: {
-                            userId: newUser.id,
-                            amount: 10,
-                            type: "BONUS",
-                            description: "Bonus de bun venit: 10 credite cadou! 🎁",
-                        },
                     });
 
                     return newUser;
@@ -107,6 +97,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     pages: {
         signIn: "/login",
+    },
+    events: {
+        async signIn({ user, account }) {
+            // Only award if user is verified (Google or Email Link used)
+            const isVerified = user.emailVerified || account?.provider === "google" || account?.provider === "email";
+
+            if (isVerified && user.id) {
+                // Check if already got the bonus
+                const existingBonus = await prisma.creditTransaction.findFirst({
+                    where: {
+                        userId: user.id,
+                        type: "BONUS",
+                        description: { contains: "bun venit" }
+                    }
+                });
+
+                if (!existingBonus) {
+                    await prisma.$transaction([
+                        prisma.user.update({
+                            where: { id: user.id },
+                            data: { credits: { increment: 10 } }
+                        }),
+                        prisma.creditTransaction.create({
+                            data: {
+                                userId: user.id,
+                                amount: 10,
+                                type: "BONUS",
+                                description: "Bonus de bun venit: 10 credite cadou! 🎁 (Email Verificat)",
+                            },
+                        })
+                    ]);
+                    console.log(`Verified bonus awarded to: ${user.email}`);
+                }
+            }
+        }
     },
     callbacks: {
         async jwt({ token, user, trigger, session }) {
@@ -135,6 +160,11 @@ declare module "next-auth" {
             id: string;
             credits: number;
         } & DefaultSession["user"];
+    }
+
+    interface User {
+        credits?: number;
+        emailVerified?: Date | null;
     }
 }
 
