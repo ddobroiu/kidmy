@@ -140,7 +140,7 @@ export default function Home() {
             className="glass border border-white/20 dark:border-white/5 rounded-3xl px-8 py-8 shadow-premium relative overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 text-center relative z-10">
               <StatItem value="10k+" label="Modele Create" emoji="🧊" />
               <StatItem value="2.5k" label="Mici Artiști" emoji="🦸" />
               <StatItem value="50+" label="Lecții 3D" emoji="🧩" />

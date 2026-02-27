@@ -275,7 +275,7 @@ export default function CreatePage() {
                         initial={{ opacity: 0, x: 16 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="glass border border-border/60 rounded-2xl overflow-hidden shadow-card min-h-[500px] relative"
+                        className="glass border border-border/60 rounded-2xl overflow-hidden shadow-card min-h-[350px] md:min-h-[500px] relative"
                     >
                         <AnimatePresence mode="wait">
                             {resultModel ? (

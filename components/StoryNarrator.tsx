@@ -159,7 +159,7 @@ export default function StoryNarrator({ animalName, description, animalColor }: 
                             Enciclopedie Audio
                         </div>
 
-                        <p className="text-gray-700 dark:text-gray-100 text-xl leading-relaxed font-bold relative z-10">
+                        <p className="text-gray-700 dark:text-gray-100 text-lg md:text-xl leading-relaxed font-bold relative z-10">
                             {facts}
                         </p>
 

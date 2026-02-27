@@ -184,7 +184,7 @@ export default function Navbar() {
                                             href={link.href}
                                             onClick={() => setIsOpen(false)}
                                             className={cn(
-                                                "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all",
+                                                "flex items-center gap-4 px-5 py-4 rounded-xl text-base font-bold transition-all",
                                                 isActive
                                                     ? "bg-primary/10 text-primary"
                                                     : "text-foreground hover:bg-muted/60 hover:text-primary"

@@ -169,7 +169,7 @@ export default function ParentsDashboard() {
                         <h2 className="text-2xl font-black text-gray-900 dark:text-white">Istoric Facturi</h2>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left">
                             <thead className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/10">
                                 <tr>
@@ -215,6 +215,39 @@ export default function ParentsDashboard() {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile View: Cards */}
+                    <div className="md:hidden flex flex-col gap-4">
+                        {purchases.length > 0 ? purchases.map((p) => (
+                            <div key={p.id} className="p-5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <div className="font-black text-gray-900 dark:text-white">{p.credits} Credite Magice</div>
+                                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider">{new Date(p.createdAt).toLocaleDateString("ro-RO")}</div>
+                                    </div>
+                                    <div className="text-lg font-black text-primary">{p.amount} {p.currency}</div>
+                                </div>
+                                {p.invoiceUrl ? (
+                                    <a
+                                        href={p.invoiceUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-white/10 rounded-xl text-xs font-black shadow-sm"
+                                    >
+                                        <FaDownload className="w-3" /> Descarcă Factură ({p.invoiceSeries} {p.invoiceNumber})
+                                    </a>
+                                ) : (
+                                    <div className="w-full py-3 bg-gray-100/50 dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10 rounded-xl text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        Factură în curs de procesare
+                                    </div>
+                                )}
+                            </div>
+                        )) : (
+                            <div className="py-12 text-center text-gray-400 font-bold italic text-sm">
+                                Nu ai nicio achiziție înregistrată încă.
+                            </div>
+                        )}
                     </div>
                 </div>
 
