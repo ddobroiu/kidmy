@@ -3,13 +3,21 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 import EmailProvider from "next-auth/providers/email";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { Resend } from "resend";
+import bcrypt from "bcryptjs";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
+    session: { strategy: "jwt" },
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
         EmailProvider({
             server: {
                 host: process.env.EMAIL_SERVER_HOST || "smtp.resend.com",
@@ -22,13 +30,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             from: process.env.EMAIL_FROM || "onboarding@resend.dev",
             sendVerificationRequest: async ({ identifier, url, provider }) => {
                 try {
-                    const { host } = new URL(url);
-                    // Standard Resend logic
                     const { data, error } = await resend.emails.send({
                         from: provider.from || "onboarding@resend.dev",
                         to: identifier,
                         subject: `Autentificare în Kidmy`,
-                        text: `Link magic pentru logare: ${url}`,
                         html: `
             <body style="background: #f9f9f9; padding: 20px;">
               <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 20px; text-align: center; font-family: sans-serif;">
@@ -46,50 +51,82 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             </body>
             `,
                     });
-
-                    if (error) {
-                        console.error("Resend error:", error);
-                        throw new Error("Failed to send verification email: " + error.message);
-                    }
-
-                    console.log("Verification email sent to:", identifier, "ID:", data?.id);
-
+                    if (error) throw new Error(error.message);
                 } catch (error) {
-                    console.error("Failed to send verification email", error);
-                    throw new Error("Failed to send verification email");
+                    console.error("Verification email failed", error);
                 }
+            },
+        }),
+        CredentialsProvider({
+            name: "Parolă",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Parolă", type: "password" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) return null;
+
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email as string },
+                });
+
+                // Simple auto-register if user doesn't exist? 
+                // No, let's just do login for now to be safe, or allow creation if no user
+                if (!user) {
+                    // Create user if not exist (Auto-register)
+                    const hashedPassword = await bcrypt.hash(credentials.password as string, 10);
+                    const newUser = await prisma.user.create({
+                        data: {
+                            email: credentials.email as string,
+                            passwordHash: hashedPassword,
+                            credits: 10,
+                        }
+                    });
+
+                    // Add bonus credits
+                    await prisma.creditTransaction.create({
+                        data: {
+                            userId: newUser.id,
+                            amount: 10,
+                            type: "BONUS",
+                            description: "Bonus de bun venit: 10 credite cadou! 🎁",
+                        },
+                    });
+
+                    return newUser;
+                }
+
+                if (!user.passwordHash) return null; // User registered via social/email but no password set
+
+                const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
+                if (!isValid) return null;
+
+                return user;
             },
         }),
     ],
     pages: {
         signIn: "/login",
-        verifyRequest: "/auth/verify-request", // (Optional) Custom verify page
     },
     callbacks: {
-        session: async ({ session, user }) => {
-            if (session?.user) {
-                session.user.id = user.id;
-                (session.user as any).credits = (user as any).credits;
+        async jwt({ token, user, trigger, session }) {
+            if (user) {
+                token.id = user.id;
+                token.credits = (user as any).credits;
+            }
+            if (trigger === "update" && session?.credits !== undefined) {
+                token.credits = session.credits;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token && session.user) {
+                session.user.id = token.id as string;
+                (session.user as any).credits = token.credits as number;
             }
             return session;
-        }
+        },
     },
-    events: {
-        async createUser({ user }) {
-            if (!user.id) return;
-
-            await prisma.creditTransaction.create({
-                data: {
-                    userId: user.id,
-                    amount: 10,
-                    type: "BONUS",
-                    description: "Bonus de bun venit: 10 credite cadou! 🎁",
-                },
-            });
-
-            console.log(`Bonus credits awarded to new user: ${user.email}`);
-        }
-    }
 });
 
 declare module "next-auth" {
@@ -98,10 +135,6 @@ declare module "next-auth" {
             id: string;
             credits: number;
         } & DefaultSession["user"];
-    }
-
-    interface User {
-        credits?: number;
     }
 }
 
