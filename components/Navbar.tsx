@@ -23,6 +23,7 @@ export default function Navbar() {
     const navLinks = [
         { name: "Acasă", href: "/", emoji: "⚡" },
         { name: "Galerie", href: "/gallery", emoji: "💎" },
+        { name: "Blog", href: "/blog", emoji: "📝" },
         { name: "Descoperă", href: "/learn", emoji: "🪐" },
         { name: "Părinți", href: "/parents", emoji: "🛡️" },
     ];
