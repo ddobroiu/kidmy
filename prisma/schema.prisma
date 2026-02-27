@@ -19,7 +19,7 @@ model User {
   passwordHash       String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-  credits            Int      @default(10) // Credits awarded after verification
+  credits            Int      @default(0) // Credits awarded after verification
   totalCreditsUsed   Int      @default(0)
   subscriptionTier   String   @default("FREE") // FREE, BASIC, PRO, PREMIUM
   lastCreditRefill   DateTime @default(now())
