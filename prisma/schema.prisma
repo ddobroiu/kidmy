@@ -33,6 +33,7 @@ model User {
   purchases          Purchase[]
   billingDetails     BillingDetails?
   shopPurchases      ShopPurchase[]
+  orders             Order[]
 }
 
 model BillingDetails {
@@ -212,4 +213,56 @@ model ShopPurchase {
   item      ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade) // Relation to ShopItem
   
   @@unique([userId, itemId]) // Prevent double purchase
+}
+
+model PhysicalProduct {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float    // Price in RON
+  currency    String   @default("RON")
+  imageUrl    String?
+  stock       Int      @default(0)
+  category    String   // Ghiozdane, Rechizite, Accesorii
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orders      OrderItem[]
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  status          String   @default("PENDING") // PENDING, PAID, SHIPPED, DELIVERED, CANCELLED
+  totalAmount     Float
+  currency        String   @default("RON")
+  stripeSessionId String?  @unique
+  
+  // Shipping details
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingZip     String?
+  shippingPhone   String?
+  
+  items           OrderItem[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id               String          @id @default(cuid())
+  orderId          String
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          PhysicalProduct @relation(fields: [productId], references: [id])
+  quantity         Int
+  priceAtPurchase  Float
+  
+  @@index([orderId])
+  @@index([productId])
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { CREDIT_PACKAGES } from "@/lib/credit-packages";
 import { FaCheck, FaSpinner, FaLock, FaCreditCard, FaCog, FaDownload, FaHistory, FaBuilding, FaUser } from "react-icons/fa";
