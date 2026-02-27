@@ -73,7 +73,8 @@ export default function ModelViewer({
         if (existing) host.removeChild(existing);
 
         const el = document.createElement("model-viewer");
-        el.setAttribute("src", url);
+        const proxiedUrl = `/api/proxy-model?url=${encodeURIComponent(url)}`;
+        el.setAttribute("src", proxiedUrl);
         if (poster) el.setAttribute("poster", poster);
         el.setAttribute("camera-controls", "");
         el.setAttribute("shadow-intensity", "1");
