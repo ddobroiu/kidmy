@@ -16,8 +16,53 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Kidmy - Creează-ți Lumea 3D",
-  description: "Platforma unde copiii își pot crea propriile personaje 3D și se pot juca în VR.",
+  title: {
+    default: "Kidmy - Creează-ți Lumea 3D | Platformă Educațională",
+    template: "%s | Kidmy"
+  },
+  description: "Platforma educațională unde copiii își transformă desenele în modele 3D reale, învață despre animale și explorează viitorul prin AR și AI.",
+  keywords: ["educatie copii", "3d pentru copii", "realitate augmentata copii", "invatare interactiva", "animale 3d", "ai pentru copii", "creativitate digitala"],
+  authors: [{ name: "Kidmy Team" }],
+  creator: "Kidmy",
+  publisher: "Kidmy",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "ro_RO",
+    url: "https://www.kidmy.ro",
+    siteName: "Kidmy",
+    title: "Kidmy - Magia 3D pentru Copii",
+    description: "Transformă imaginația în realitate 3D și învață prin joacă.",
+    images: [
+      {
+        url: "https://www.kidmy.ro/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Kidmy 3D Education",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kidmy - Creează-ți Lumea 3D",
+    description: "Platforma educațională 3D pentru micii creatori.",
+    images: ["https://www.kidmy.ro/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
