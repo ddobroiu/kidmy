@@ -65,16 +65,6 @@ export default function ModelViewer({
         }
     }, [backgroundColor]);
 
-    const [proxiedUrl, setProxiedUrl] = useState(url);
-
-    useEffect(() => {
-        if (typeof window !== "undefined" && url.startsWith('http') && !url.includes(window.location.origin)) {
-            setProxiedUrl(`/api/proxy-model?url=${encodeURIComponent(url)}`);
-        } else {
-            setProxiedUrl(url);
-        }
-    }, [url]);
-
     useEffect(() => {
         const host = hostRef.current;
         if (!host) return;
@@ -83,10 +73,10 @@ export default function ModelViewer({
         if (existing) host.removeChild(existing);
 
         const el = document.createElement("model-viewer");
-        el.setAttribute("src", proxiedUrl);
+        el.setAttribute("src", url);
         if (poster) el.setAttribute("poster", poster);
         el.setAttribute("camera-controls", "");
-        el.setAttribute("shadow-intensity", "1.5");
+        el.setAttribute("shadow-intensity", "1");
         el.setAttribute("shadow-softness", "1");
         el.setAttribute("auto-rotate", "");
         el.setAttribute("tone-mapping", "aces");
@@ -96,93 +86,52 @@ export default function ModelViewer({
 
         if (showArButton) {
             el.setAttribute("ar", "");
-            // Recommended order: webxr first for modern browsers, then scene-viewer for android, then quick-look for ios
             el.setAttribute("ar-modes", "webxr scene-viewer quick-look");
-            el.setAttribute("ar-scale", "auto");
-            el.setAttribute("ar-placement", "floor");
         }
 
         el.style.width = "100%";
         el.style.height = "100%";
         el.setAttribute("exposure", String(exposure));
-        el.style.backgroundColor = bgColor;
+        el.style.backgroundColor = bgColor === 'transparent' ? 'transparent' : bgColor;
 
-        // Custom AR Button - Enhanced for visibility
-        const arButton = document.createElement("button");
-        arButton.slot = "ar-button";
-        arButton.style.cssText = `
-            position: absolute; 
-            bottom: 24px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            color: white; 
-            border-radius: 100px; 
-            border: none; 
-            padding: 12px 24px; 
-            font-weight: 900; 
-            font-family: inherit; 
-            font-size: 14px; 
-            cursor: pointer; 
-            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5); 
-            z-index: 1000; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        `;
-        arButton.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-            Adu-l în camera ta
-        `;
-        el.appendChild(arButton);
-
-        // Custom Progress Bar
+        // Custom Progress Bar logic
         const progressBar = document.createElement("div");
         progressBar.slot = "progress-bar";
         progressBar.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            pointer-events: none;
-            backdrop-filter: blur(12px);
-            transition: opacity 0.3s;
-            z-index: 100;
-        `;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 160px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        pointer-events: none;
+        backdrop-filter: blur(8px);
+        transition: opacity 0.3s;
+        z-index: 100;
+    `;
 
         progressBar.innerHTML = `
-            <div style="font-family: inherit; font-size: 14px; font-weight: 900; color: white; display: flex; align-items: center; gap: 10px;">
-                <svg class="spinner" viewBox="0 0 50 50" style="width: 18px; height: 18px; animation: spin 1s linear infinite;">
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" style="opacity: 0.3"></circle>
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="80" stroke-dashoffset="60"></circle>
-                </svg>
-                <span id="progress-text">Se încarcă magia... 0%</span>
-            </div>
-            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                <div id="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(to right, #6366f1, #a855f7); transition: width 0.1s;"></div>
-            </div>
-        `;
+        <div style="font-family: sans-serif; font-size: 11px; font-weight: bold; color: white; display: flex; align-items: center; gap: 6px;">
+            <svg class="spinner" viewBox="0 0 50 50" style="width: 12px; height: 12px; animation: spin 1s linear infinite;">
+                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" style="opacity: 0.3"></circle>
+                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="80" stroke-dashoffset="60"></circle>
+            </svg>
+            <span id="progress-text">Se încarcă magia... 0%</span>
+        </div>
+        <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+            <div id="progress-fill" style="width: 0%; height: 100%; background: #a855f7; transition: width 0.1s;"></div>
+        </div>
+    `;
 
         el.appendChild(progressBar);
 
-        // Event Listeners for Progress
         const onProgress = (event: any) => {
             const percentage = event.detail.totalProgress * 100;
             const fill = progressBar.querySelector('#progress-fill') as HTMLElement;
@@ -198,12 +147,12 @@ export default function ModelViewer({
             }, 500);
         };
 
-        const onError = (event: any) => {
-            console.error("ModelViewer Error:", event);
-            const text = progressBar.querySelector('#progress-text') as HTMLElement;
-            if (text) {
-                text.innerText = "Hopa! Ceva n-a mers.";
-                text.style.color = "#ef4444";
+        const onError = (error: any) => {
+            console.error("ModelViewer Error:", error);
+            const statusLabel = progressBar.querySelector('#progress-text') as HTMLElement;
+            if (statusLabel) {
+                statusLabel.innerText = "Eroare la model! (Verifică R2)";
+                statusLabel.style.color = "#ef4444";
             }
         };
 
@@ -219,53 +168,43 @@ export default function ModelViewer({
                 host.removeChild(el);
             }
         };
-    }, [proxiedUrl]);
+    }, [url]);
 
     useEffect(() => {
         if (viewerRef.current) {
             viewerRef.current.setAttribute("exposure", String(exposure));
-
-            // Fix background application - always keep environment-image for lighting
             if (bgColor === 'transparent') {
                 viewerRef.current.style.backgroundColor = 'transparent';
             } else {
                 viewerRef.current.style.backgroundColor = bgColor;
             }
-            viewerRef.current.setAttribute('environment-image', 'neutral');
         }
     }, [exposure, bgColor]);
 
     return (
         <div
-            className={`w-full h-full flex flex-col gap-2 overflow-hidden bg-gray-900 ${className} ${typeof height === 'number' ? 'rounded-xl border border-white/10' : ''}`}
+            className={`w-full overflow-hidden flex flex-col relative ${className}`}
             style={{ height: height }}
         >
             <div
                 ref={hostRef}
-                className="w-full flex-1 relative min-h-0 group"
+                className="w-full flex-1 relative min-h-0"
             >
                 {showArButton && !isTouch && (
-                    <div className="absolute top-4 right-4 z-50 hidden lg:block">
+                    <div className="absolute top-4 right-4 z-50">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowQR(!showQR);
                             }}
-                            className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-2 rounded-lg border border-white/10 transition-all shadow-lg flex items-center gap-2"
-                            title="Scanează pentru AR pe mobil"
+                            className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-2 rounded-lg border border-white/10 transition-all shadow-lg"
                         >
-                            <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                            <span className="text-xs font-bold">AR pe Mobil</span>
+                            <span className="text-xs font-bold">AR Mobile</span>
                         </button>
 
                         {showQR && (
-                            <div className="absolute top-full right-0 mt-2 bg-white p-4 rounded-xl shadow-2xl border border-gray-200 animate-in fade-in zoom-in duration-200 w-48 flex flex-col items-center">
-                                <div className="bg-white p-1">
-                                    <QRCode value={fullUrl} size={150} />
-                                </div>
-                                <p className="text-black text-[10px] font-bold mt-2 text-center leading-tight">
-                                    Scanează cu telefonul<br />pentru vizualizare AR
-                                </p>
+                            <div className="absolute top-full right-0 mt-2 bg-white p-4 rounded-xl shadow-2xl border border-gray-200 w-48 flex flex-col items-center">
+                                <QRCode value={fullUrl} size={150} />
                             </div>
                         )}
                     </div>
@@ -273,9 +212,8 @@ export default function ModelViewer({
             </div>
 
             {showControls && (
-                <div className="bg-white/5 border-t border-white/10 p-2 flex flex-wrap gap-4 items-center shrink-0">
-                    <div className="flex items-center gap-2 flex-1 min-w-[120px]">
-                        <span className="text-[10px] uppercase text-gray-400 font-bold whitespace-nowrap">Expunere</span>
+                <div className="bg-white/5 border-t border-white/10 p-2 flex gap-4 items-center shrink-0">
+                    <div className="flex items-center gap-2 flex-1">
                         <input
                             type="range"
                             min="0.2"
@@ -283,36 +221,8 @@ export default function ModelViewer({
                             step="0.1"
                             value={exposure}
                             onChange={(e) => setExposure(parseFloat(e.target.value))}
-                            className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-purple-500"
                         />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        {fullScreenUrl && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(fullScreenUrl, '_blank');
-                                }}
-                                className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors border border-transparent hover:border-white/10"
-                                title="Ecran complet / Tab nou"
-                            >
-                                <FaExpand className="text-sm" />
-                            </button>
-                        )}
-
-                        <span className="text-[10px] uppercase text-gray-400 font-bold ml-2">Fundal</span>
-                        <div className="flex gap-1.5">
-                            {["#202020", "#ffffff", "#000000", "#3b82f6", "#ef4444", "transparent"].map((color) => (
-                                <button
-                                    key={color}
-                                    onClick={() => setInnerBgColor(color)}
-                                    className={`w-4 h-4 rounded-full border border-white/20 transition-transform hover:scale-110 shadow-sm ${bgColor === color ? "ring-1 ring-white scale-110 border-transparent" : ""} ${color === 'transparent' ? 'bg-[url("https://www.transparenttextures.com/patterns/carbon-fibre.png")] bg-center' : ''}`}
-                                    style={{ backgroundColor: color === 'transparent' ? undefined : color }}
-                                    aria-label={`Set background to ${color}`}
-                                />
-                            ))}
-                        </div>
                     </div>
                 </div>
             )}

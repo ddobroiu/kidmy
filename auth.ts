@@ -51,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         console.error("Resend error:", error);
                         throw new Error("Failed to send verification email: " + error.message);
                     }
-                    
+
                     console.log("Verification email sent to:", identifier, "ID:", data?.id);
 
                 } catch (error) {
@@ -69,9 +69,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session: async ({ session, user }) => {
             if (session?.user) {
                 session.user.id = user.id;
-                // session.user.role = user.role; // if we had roles
+                (session.user as any).credits = (user as any).credits;
             }
             return session;
         }
+    },
+    events: {
+        async createUser({ user }) {
+            if (!user.id) return;
+
+            await prisma.creditTransaction.create({
+                data: {
+                    userId: user.id,
+                    amount: 10,
+                    type: "BONUS",
+                    description: "Bonus de bun venit: 10 credite cadou! 🎁",
+                },
+            });
+
+            console.log(`Bonus credits awarded to new user: ${user.email}`);
+        }
     }
 });
+
+declare module "next-auth" {
+    interface Session {
+        user: {
+            id: string;
+            credits: number;
+        } & DefaultSession["user"];
+    }
+
+    interface User {
+        credits?: number;
+    }
+}
+
+import { DefaultSession } from "next-auth";
