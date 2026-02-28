@@ -20,7 +20,6 @@ export default function LearnPage() {
     return (
         <div className="min-h-screen pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative">
             {/* Background */}
-            <div className="fixed inset-0 -z-10 grid-pattern" />
             <div className="fixed inset-0 -z-10 overflow-hidden">
                 <div className="absolute top-[10%] right-[-5%] w-[35%] h-[35%] bg-primary/8 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[10%] left-[-5%] w-[40%] h-[40%] bg-accent/6 rounded-full blur-[140px]" />

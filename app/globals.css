@@ -111,6 +111,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
 h1,
 h2,
 h3,
@@ -340,9 +352,9 @@ h5,
 /* ===== GRID PATTERN ===== */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* ===== DOTS PATTERN ===== */
@@ -357,7 +369,7 @@ h5,
     letter-spacing: -0.02em;
     line-height: 1.2;
   }
-  
+
   .mobile-px-safe {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
@@ -367,6 +379,7 @@ h5,
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

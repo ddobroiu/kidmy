@@ -24,7 +24,6 @@ export default function ModelDetail({ params }: { params: Promise<{ id: string }
     return (
         <div className="min-h-screen pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative">
             {/* Background */}
-            <div className="fixed inset-0 -z-10 grid-pattern" />
             <div className="fixed inset-0 -z-10 overflow-hidden">
                 <div className={cn("absolute top-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full blur-[160px] opacity-15", modelItem.color)} />
                 <div className={cn("absolute bottom-[-5%] left-[-5%] w-[35%] h-[35%] rounded-full blur-[120px] opacity-8", modelItem.color)} />

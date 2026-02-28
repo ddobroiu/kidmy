@@ -21,7 +21,6 @@ export default function Home() {
   return (
     <div ref={containerRef} className="relative">
       {/* Ambient background */}
-      <div className="fixed inset-0 -z-10 grid-pattern" />
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[140px] animate-pulse-glow" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/8 rounded-full blur-[160px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />

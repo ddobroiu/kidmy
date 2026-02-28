@@ -52,7 +52,6 @@ export default function GalleryPage() {
     return (
         <div className="min-h-screen pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative">
             {/* Background */}
-            <div className="fixed inset-0 -z-10 grid-pattern" />
             <div className="fixed inset-0 -z-10 overflow-hidden">
                 <div className="absolute top-[5%] left-[-5%] w-[30%] h-[30%] bg-primary/6 rounded-full blur-[120px]" />
                 <div className="absolute top-[50%] right-[-5%] w-[35%] h-[35%] bg-accent/5 rounded-full blur-[140px]" />

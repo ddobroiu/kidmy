@@ -12,6 +12,7 @@ export default function ParentsDashboard() {
     const [purchases, setPurchases] = useState<any[]>([]);
     const [loadingData, setLoadingData] = useState(true);
     const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+    const [pendingPackageId, setPendingPackageId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -42,8 +43,8 @@ export default function ParentsDashboard() {
 
     const handlePurchase = async (packageId: string) => {
         if (!billingDetails) {
+            setPendingPackageId(packageId);
             setIsBillingModalOpen(true);
-            alert("Vă rugăm să completați datele de facturare înainte de a efectua o plată.");
             return;
         }
 
@@ -261,10 +262,19 @@ export default function ParentsDashboard() {
 
             <BillingModal
                 isOpen={isBillingModalOpen}
-                onClose={() => setIsBillingModalOpen(false)}
-                onSuccess={() => {
+                onClose={() => {
                     setIsBillingModalOpen(false);
-                    fetchData();
+                    setPendingPackageId(null);
+                }}
+                onSuccess={async () => {
+                    setIsBillingModalOpen(false);
+                    await fetchData(); // Refresh billing details
+                    if (pendingPackageId) {
+                        const pkgId = pendingPackageId;
+                        setPendingPackageId(null);
+                        // Using a small delay to ensure state and modal closure are handled cleanly
+                        setTimeout(() => handlePurchase(pkgId), 100);
+                    }
                 }}
                 initialData={billingDetails}
             />
