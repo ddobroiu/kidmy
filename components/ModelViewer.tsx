@@ -73,8 +73,9 @@ export default function ModelViewer({
         if (existing) host.removeChild(existing);
 
         const el = document.createElement("model-viewer");
-        // Use direct URL since CORS is configured in R2
-        el.setAttribute("src", url);
+        const proxiedUrl = `/api/proxy-model?url=${encodeURIComponent(url)}`;
+        el.setAttribute("src", proxiedUrl);
+        el.setAttribute("crossorigin", "anonymous");
         if (poster) el.setAttribute("poster", poster);
         el.setAttribute("camera-controls", "");
         el.setAttribute("shadow-intensity", "1");

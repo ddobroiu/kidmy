@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  transpilePackages: ["@google/model-viewer"],
 };
 
 export default nextConfig;
