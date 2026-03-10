@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { r2, UPLOAD_BUCKET } from "@/lib/r2";
 

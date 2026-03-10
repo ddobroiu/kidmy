@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { replicate, translateText } from "@/lib/replicate";
 import { auth } from "@/auth";
