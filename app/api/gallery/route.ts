@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { translateText } from "@/lib/replicate";
 
-export const dynamic = 'force-dynamic';
 
 import { auth } from "@/auth";
 

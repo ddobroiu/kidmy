@@ -4,7 +4,6 @@ import { replicate } from "@/lib/replicate";
 import { r2, UPLOAD_BUCKET } from "@/lib/r2";
 import { prisma } from "@/lib/db";
 
-export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);

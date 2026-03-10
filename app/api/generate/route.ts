@@ -5,7 +5,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 // Force dynamic since we use Request
-export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {

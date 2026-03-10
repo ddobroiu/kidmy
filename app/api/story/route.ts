@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { replicate } from "@/lib/replicate";
 
-export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {
