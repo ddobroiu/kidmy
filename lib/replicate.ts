@@ -1,3 +1,4 @@
+// Replicate helper for KIDMY
 import Replicate from "replicate";
 
 export const getReplicate = () => new Replicate({
