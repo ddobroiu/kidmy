@@ -1,10 +1,11 @@
 import Replicate from "replicate";
 
-export const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN,
+export const getReplicate = () => new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN || "r8_dummy",
 });
 
 export async function translateText(text: string): Promise<string> {
+    const replicate = getReplicate();
     if (!text || text.trim().length === 0) return text;
 
     try {
