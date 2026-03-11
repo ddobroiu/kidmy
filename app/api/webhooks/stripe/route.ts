@@ -4,13 +4,12 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/db";
 import { oblioService } from "@/lib/oblio";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2025-12-15.clover" as any,
-});
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
-
 export async function POST(req: NextRequest) {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_dummy", {
+        apiVersion: "2025-12-15.clover" as any,
+    });
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+
     const payload = await req.text();
     const sig = req.headers.get("stripe-signature") as string;
 

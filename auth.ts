@@ -8,7 +8,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { Resend } from "resend";
 import bcrypt from "bcryptjs";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY); // Moved inside to prevent build errors
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
@@ -29,6 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             from: process.env.EMAIL_FROM || "onboarding@resend.dev",
             sendVerificationRequest: async ({ identifier, url, provider }) => {
+                const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy');
                 try {
                     const { data, error } = await resend.emails.send({
                         from: provider.from || "onboarding@resend.dev",
