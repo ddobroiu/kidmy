@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import { replicate } from "@/lib/replicate";
+import { getReplicate } from "@/lib/replicate";
 
 
 export async function POST(req: NextRequest) {
+    const replicate = getReplicate();
     try {
         const { animalName, description } = await req.json();
 
