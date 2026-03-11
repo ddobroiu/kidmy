@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import { replicate, translateText } from "@/lib/replicate";
+import { getReplicate, translateText } from "@/lib/replicate";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 // Force dynamic since we use Request
 
 export async function POST(req: NextRequest) {
+    const replicate = getReplicate();
     try {
         const session = await auth();
         // Allow generation without login? User wants gallery, so login preferred.

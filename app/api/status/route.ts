@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
-import { replicate } from "@/lib/replicate";
+import { getReplicate } from "@/lib/replicate";
 import { r2, UPLOAD_BUCKET } from "@/lib/r2";
 import { prisma } from "@/lib/db";
 
 
 export async function GET(req: NextRequest) {
+    const replicate = getReplicate();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const generationId = searchParams.get("generationId"); // We need this to update DB
