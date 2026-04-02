@@ -1,0 +1,267 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  name               String?
+  username           String?   @unique
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  passwordHash       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  credits            Int      @default(0) // Credits awarded after verification
+  totalCreditsUsed   Int      @default(0)
+  subscriptionTier   String   @default("FREE") // FREE, BASIC, PRO, PREMIUM
+  lastCreditRefill   DateTime @default(now())
+  apiKey             String?  @unique @default(cuid())
+  
+  // Relations
+  accounts           Account[]
+  sessions           Session[]
+  generations        Generation[]
+  creditTransactions CreditTransaction[]
+  purchases          Purchase[]
+  billingDetails     BillingDetails?
+  shopPurchases      ShopPurchase[]
+  orders             Order[]
+}
+
+model BillingDetails {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String   @default("personal") // personal, company
+  firstName   String?
+  lastName    String?
+  companyName String?
+  cui         String?  // VAT ID
+  regCom      String?  // J-number
+  address     String
+  city        String
+  state       String?
+  country     String
+  zip         String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  identifier String   // user email
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([identifier])
+  @@index([token])
+}
+
+model Generation {
+  id               String   @id @default(cuid())
+  userId           String
+  originalImageUrl String
+  prompt           String?
+  videoUrl         String?
+  modelUrl         String?
+  status           String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  creditsCost      Int      @default(1)
+  processingTime   Int?     // in seconds
+  quality          String   @default("STANDARD") // STANDARD, HIGH, ULTRA
+  hostEnabled      Boolean  @default(false)
+  hostUrl          String?
+  hostingPaidUntil DateTime?
+  autoRenewal      Boolean  @default(false)  // If true, system tries to deduct credits automatically
+  createdAt        DateTime @default(now())
+  completedAt      DateTime?
+  errorMessage     String?
+  views            Int      @default(0)
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Int      // positive for add, negative for use
+  type        String   // PURCHASE, GENERATION_USE, REFUND, BONUS, SHOP_PURCHASE
+  description String
+  createdAt   DateTime @default(now())
+  purchaseId  String?  // Reference to purchase if applicable
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Purchase {
+  id              String   @id @default(cuid())
+  userId          String
+  stripeSessionId String?  @unique
+  amount          Float    // price in RON/EUR
+  credits         Int      // credits purchased
+  status          String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  currency        String   @default("RON")
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+  
+  // Invoice Details
+  invoiceSeries   String?
+  invoiceNumber   String?
+  invoiceUrl      String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([stripeSessionId])
+  @@index([status])
+}
+
+model CreditPackage {
+  id          String  @id @default(cuid())
+  name        String
+  credits     Int
+  price       Float   // in RON/EUR
+  currency    String  @default("RON")
+  popular     Boolean @default(false)
+  bonus       Int     @default(0) // extra credits as bonus
+  active      Boolean @default(true)
+  
+  @@unique([credits, price])
+}
+
+model ShopItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  price       Int      @default(0) // Price in credits
+  category    String   // Characters, Fashion, Vehicles, Architecture, etc.
+  modelUrl    String   // URL in R2
+  imageUrl    String   // Thumbnail URL
+  polys       String?  // e.g. "12k"
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  purchases   ShopPurchase[]
+
+  @@index([category])
+  @@index([isPublic])
+}
+
+model ShopPurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  pricePaid Int      // store price at purchase moment
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      ShopItem @relation(fields: [itemId], references: [id], onDelete: Cascade) // Relation to ShopItem
+  
+  @@unique([userId, itemId]) // Prevent double purchase
+}
+
+model PhysicalProduct {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float    // Price in RON
+  currency    String   @default("RON")
+  imageUrl    String?
+  stock       Int      @default(0)
+  category    String   // Ghiozdane, Rechizite, Accesorii
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orders      OrderItem[]
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  status          String   @default("PENDING") // PENDING, PAID, SHIPPED, DELIVERED, CANCELLED
+  totalAmount     Float
+  currency        String   @default("RON")
+  stripeSessionId String?  @unique
+  
+  // Shipping details
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingZip     String?
+  shippingPhone   String?
+  
+  items           OrderItem[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id               String          @id @default(cuid())
+  orderId          String
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          PhysicalProduct @relation(fields: [productId], references: [id])
+  quantity         Int
+  priceAtPurchase  Float
+  
+  @@index([orderId])
+  @@index([productId])
+}
